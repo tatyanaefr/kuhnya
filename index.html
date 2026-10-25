@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Кухня Артёма</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#E4513A">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
@@ -59,7 +59,7 @@
     -webkit-tap-highlight-color: transparent;
     touch-action: none;
   }
-  #stage { position: absolute; left: 0; top: 0; width: 1600px; height: 1000px; transform-origin: 0 0; }
+  #stage { position: fixed; left: 0; top: 0; width: 1600px; height: 1000px; transform-origin: 0 0; }
   .screen { position: absolute; inset: 0; display: none; z-index: 1; }
   .screen.on { display: block; }
   button { font-family: inherit; color: inherit; }
@@ -1854,8 +1854,13 @@ const NEW_DISH_ICON = {
 const G = { s: 1, gen: 0, loops: [], muted: false, busy: true, step: null, key: null, S: null };
 try { G.muted = localStorage.getItem("kuhnya-artema-mute") === "1"; } catch (e) {}
 
+// размер экрана берём у самой страницы: innerWidth на телефоне бывает «отдалённым» и больше экрана
+function screenSize() {
+  const d = document.documentElement;
+  return [d.clientWidth || innerWidth, d.clientHeight || innerHeight];
+}
 function fit() {
-  const W = innerWidth, H = innerHeight, s = Math.min(W / 1600, H / 1000);
+  const [W, H] = screenSize(), s = Math.min(W / 1600, H / 1000);
   const ox = (W - 1600 * s) / 2, oy = (H - 1000 * s) / 2;
   G.s = s;
   stage.style.transform = `translate(${ox}px,${oy}px) scale(${s})`;
@@ -1894,6 +1899,9 @@ function fit() {
   b.backgroundRepeat = "no-repeat";
 }
 addEventListener("resize", fit);
+// после поворота телефона размеры приходят не сразу — пересчитываем ещё пару раз
+addEventListener("orientationchange", () => [100, 400, 900].forEach(ms => setTimeout(fit, ms)));
+if (window.visualViewport) visualViewport.addEventListener("resize", fit);
 fit();
 
 // координаты кухни из координат экрана
