@@ -1,6 +1,6 @@
 // Работа без интернета: игра, картинки, шрифт и озвучка сохраняются в телефоне.
 // Страница и фразы берутся из интернета, если он есть, — так правки приходят сами.
-const CACHE = "kuhnya-v5";   // после новых картинок или переозвучки — увеличить номер
+const CACHE = "kuhnya-v6";   // после новых картинок или переозвучки — увеличить номер
 const FILES = [
   "./", "./index.html", "./фразы.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png",
   "./img/артём-повар.png", "./fonts/nunito-cyrillic.woff2", "./fonts/nunito-latin.woff2",
@@ -9,14 +9,14 @@ const FRESH = ["/", "/index.html", "/фразы.js"];   // их сначала �
 
 async function precache() {
   const cache = await caches.open(CACHE);
-  await Promise.all(FILES.map(f => cache.add(f).catch(() => {})));
+  await Promise.all(FILES.map(f => cache.add(new Request(f, { cache: "reload" })).catch(() => {})));
   // вся озвучка: список фраз лежит в audio/тексты.json
   try {
     const res = await fetch("./audio/тексты.json", { cache: "no-cache" });
     if (res.ok) {
       const keys = Object.keys(await res.json());
       for (let i = 0; i < keys.length; i += 20) {
-        await Promise.all(keys.slice(i, i + 20).map(k => cache.add("./audio/" + k + ".mp3").catch(() => {})));
+        await Promise.all(keys.slice(i, i + 20).map(k => cache.add(new Request("./audio/" + k + ".mp3", { cache: "reload" })).catch(() => {})));
       }
     }
   } catch (e) {}

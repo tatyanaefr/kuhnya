@@ -2426,7 +2426,7 @@ function openMenu(first) {
       <span class="name">Пазлы</span>
       <span class="stars"></span>
     </button>`;
-  $("toPuzzles").addEventListener("click", () => { SFX.pop(); openPuzzles(); say("puzzles"); });
+  $("toPuzzles").addEventListener("click", () => { SFX.pop(); openPuzzles(); say("puz_choose"); });
   $("dishes").querySelectorAll(".dish-card[data-k]").forEach(b => b.addEventListener("click", async () => {
     const k = b.dataset.k;
     SFX.pop();
