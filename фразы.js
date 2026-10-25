@@ -90,6 +90,12 @@ window.PHRASES = {
   "puz_cake": "Это тортик!",
   "puz_pancakes": "Это блинчики!",
   "puz_smoothie": "Это фруктовый коктейль!",
+  "puz_soup": "Это суп с лапшой!",
+  "puz_eggs": "Это яичница!",
+  "puz_salad": "Это салат!",
+  "puz_hotdog": "Это хот-дог!",
+  "puz_cookies": "Это печенье!",
+  "puz_icecream": "Это мороженое!",
   "puz_chef": "Это повар Артём!",
 
   "d_soup": "Суп с лапшой!",

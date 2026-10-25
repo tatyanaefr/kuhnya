@@ -195,17 +195,17 @@
   /* ---------- пазлы ---------- */
   #pmenu .big-title { top: 64px; font-size: 88px; }
   #pmenu .sub { position: absolute; left: 0; right: 0; top: 176px; text-align: center; font-size: 44px; font-weight: 800; color: var(--ink-soft); }
-  .pics { position: absolute; left: 0; right: 0; top: 280px; display: grid; grid-template-columns: repeat(3, 344px); justify-content: center; gap: 32px; }
+  .pics { position: absolute; left: 0; right: 0; top: 244px; display: grid; grid-template-columns: repeat(4, 248px); justify-content: center; gap: 20px 28px; }
   .pic-card {
-    height: 300px; border: 0; border-radius: 32px; padding: 16px; cursor: pointer;
+    height: 224px; border: 0; border-radius: 28px; padding: 12px; cursor: pointer;
     background: var(--card); box-shadow: 0 10px 0 rgba(150, 85, 30, .28);
     display: flex; flex-direction: column; align-items: center; gap: 8px;
   }
   .pic-card:active { transform: translateY(6px); box-shadow: 0 4px 0 rgba(150, 85, 30, .28); }
-  .pic-card .thumb { width: 312px; height: 234px; border-radius: 16px; overflow: hidden; display: block; }
+  .pic-card .thumb { width: 224px; height: 168px; border-radius: 14px; overflow: hidden; display: block; flex: none; }
   .pic-card .thumb canvas { width: 100%; height: 100%; display: block; }
-  .pic-card .stars { height: 32px; display: flex; gap: 4px; }
-  .pic-card .stars svg { width: 30px; height: 30px; }
+  .pic-card .stars { height: 26px; display: flex; gap: 4px; }
+  .pic-card .stars svg { width: 24px; height: 24px; }
   #pboard {
     position: absolute; left: 460px; top: 200px; width: 680px; height: 510px;
     background: rgba(120, 70, 30, .16); border-radius: 8px;
@@ -2544,12 +2544,28 @@ const rays = (cx, cy, c) => {
   return s;
 };
 const balloon = (x, y, c) => `<path d="M${x} ${y + 52} q-6 40 6 80" stroke="#8A7A6A" stroke-width="3" fill="none"/><ellipse cx="${x}" cy="${y}" rx="38" ry="48" fill="${c}"/><ellipse cx="${x - 12}" cy="${y - 18}" rx="9" ry="14" fill="#fff" opacity=".45"/><path d="M${x - 6} ${y + 46} h12 l-6 10z" fill="${c}"/>`;
+const peas = (c1, c2) => {
+  let s = `<rect width="680" height="510" fill="${c1}"/>`;
+  for (let y = 30, i = 0; y < 510; y += 60, i++) for (let x = i % 2 ? 60 : 30; x < 680; x += 60) s += `<circle cx="${x}" cy="${y}" r="11" fill="${c2}"/>`;
+  return s;
+};
+const stripes = (c1, c2) => {
+  let s = `<rect width="680" height="510" fill="${c1}"/>`;
+  for (let x = -510; x < 680; x += 90) s += `<path d="M${x} 510 L${x + 510} 0 h45 L${x + 45} 510Z" fill="${c2}"/>`;
+  return s;
+};
 const PUZZLES = {
   pizza: { word: "ПИЦЦА", say: "puz_pizza", svg: () => checks("#FFF3E6", "#F28B74") + gDish("pizza", 340, 255, 2.2) + gIcon("tomato", 70, 80, 1.1, -15) + gIcon("cheese", 610, 80, 1.1, 10) + gIcon("mushroom", 70, 440, 1.1, 10) + gIcon("salami", 610, 440, 1.1) },
   burger: { word: "БУРГЕР", say: "puz_burger", svg: () => `<rect width="680" height="510" fill="#8FD0F0"/>` + rays(340, 255, "#B5E2F7") + gDish("burger", 340, 250, 2.3) + gIcon("ketchup", 80, 400, 1.2, -10) + gIcon("pickle", 600, 410, 1.2) + gIcon("tomato", 600, 90, 1) + gIcon("lettuce", 80, 90, 1.1) },
   cake: { word: "ТОРТИК", say: "puz_cake", svg: () => `<rect width="680" height="510" fill="#FCE4EC"/>` + [[60, 50, 18], [150, 420, 14], [520, 470, 16], [300, 40, 10], [450, 70, 14]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#F8BBD0"/>`).join("") + balloon(90, 130, "#6EC1E4") + balloon(590, 110, "#F7CF45") + balloon(600, 290, "#E4513A") + gDish("cake", 340, 280, 2.2) },
   pancakes: { word: "БЛИНЧИКИ", say: "puz_pancakes", svg: () => checks("#FFF6D8", "#F6D46E", 50) + gDish("pancakes", 340, 260, 2.3) + gIcon("honey", 80, 100, 1.2, -8) + gIcon("strawberry", 600, 100, 1.1, 12) + gIcon("blueberry", 600, 420, 1.1) + gIcon("jam", 80, 420, 1.1) },
   smoothie: { word: "КОКТЕЙЛЬ", say: "puz_smoothie", svg: () => `<rect width="680" height="510" fill="#D9F0E8"/>` + rays(340, 255, "#EAF7F2") + gDish("smoothie", 340, 250, 2.3) + gIcon("banana", 90, 110, 1.3, -10) + gIcon("strawberry", 590, 100, 1.2, 10) + gIcon("kiwi", 90, 410, 1.2) + gIcon("orange", 590, 410, 1.2) },
+  soup: { word: "СУП", say: "puz_soup", svg: () => checks("#EAF5FB", "#7EC4E3") + gDish("soup", 340, 255, 2.2) + gIcon("carrot", 80, 95, 1.2, -20) + gIcon("chicken", 600, 95, 1.2, 10) + gIcon("noodles", 80, 420, 1.1) + gIcon("greens", 600, 415, 1.2) },
+  eggs: { word: "ЯИЧНИЦА", say: "puz_eggs", svg: () => `<rect width="680" height="510" fill="#FFE9A8"/>` + rays(340, 255, "#FFF4CF") + gDish("eggs", 340, 250, 2.3) + gIcon("egg", 85, 100, 1.2, -12) + gIcon("tomato", 600, 95, 1.1, 10) + gIcon("butter", 85, 420, 1.2) + gIcon("salt", 600, 415, 1.2, 8) },
+  salad: { word: "САЛАТ", say: "puz_salad", svg: () => checks("#EEF8E4", "#9BD27A") + gDish("salad", 340, 250, 2.3) + gIcon("tomato", 80, 95, 1.1, -12) + gIcon("avocado", 600, 100, 1.2, 12) + gIcon("pickle", 80, 420, 1.2) + gIcon("lettuce", 600, 420, 1.2) },
+  hotdog: { word: "ХОТ-ДОГ", say: "puz_hotdog", svg: () => stripes("#FFF1E0", "#FFD7B8") + gDish("hotdog", 340, 230, 3.4) + gIcon("ketchup", 85, 100, 1.2, -10) + gIcon("sausage", 600, 95, 1.2) + gIcon("pickle", 85, 420, 1.2) + gIcon("hdBun", 600, 420, 1.2) },
+  cookies: { word: "ПЕЧЕНЬЕ", say: "puz_cookies", svg: () => peas("#E2F0FA", "#C4DFF2") + gDish("cookies", 340, 255, 2.2) + gIcon("milk", 85, 100, 1.2, -8) + gIcon("cut_star", 600, 95, 1.2, 15) + gIcon("cut_heart", 85, 420, 1.2, -10) + gIcon("cut_car", 600, 420, 1.2) },
+  icecream: { word: "МОРОЖЕНОЕ", say: "puz_icecream", svg: () => peas("#E3F6EE", "#F8C4D2") + gDish("icecream", 340, 260, 2.2) + gIcon("scoop_s", 85, 100, 1.2, -8) + gIcon("cherry", 600, 95, 1.2) + gIcon("scoop_m", 85, 420, 1.2) + gIcon("sprinkles", 600, 420, 1.2, 10) },
   chef: { word: "АРТЁМ", say: "puz_chef", chef: true, svg: () => `<rect width="680" height="510" fill="#FFE0B2"/>` + rays(340, 255, "#FFECCF") + gDish("cake", 570, 140, .95) + gDish("burger", 110, 140, .9) + gDish("smoothie", 570, 390, .9) + gDish("pancakes", 110, 400, .9) },
 };
 const PIC = {};
