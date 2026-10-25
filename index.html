@@ -1,0 +1,2649 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Кухня Артёма</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#E4513A">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<style>
+  /* шрифт лежит рядом с игрой: работает без интернета и не обращается к Google */
+  @font-face { font-family: "Nunito"; font-weight: 800 900; font-display: swap; src: url(fonts/nunito-cyrillic.woff2) format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+  @font-face { font-family: "Nunito"; font-weight: 800 900; font-display: swap; src: url(fonts/nunito-latin.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+  /* три варианта оформления: index.html?theme=1, 2 или 3 */
+  :root {
+    --wall: #FBE9D7;
+    --wall-line: #F3D9C0;
+    --wood: #DFA367;
+    --wood-edge: #C4844A;
+    --ink: #3B2414;
+    --ink-soft: #7A5640;
+    --card: #FFF8EF;
+    --title: #E4513A;
+    --font: "Nunito", "Trebuchet MS", sans-serif;
+    --red: #E4513A;
+    --red-dark: #B43A27;
+    --green: #3E9B4F;
+    --green-dark: #2C7339;
+    --gold: #F6B92B;
+    --gold-dark: #C98A00;
+  }
+  /* Вариант 1 «Клетчатая скатерть» — стол в клетку, контур у всех предметов, деревянные кнопки */
+  :root[data-theme="1"] {
+    --wall: #FFF3E6; --wall-line: #F5DFC8; --wood: #FCE3D3; --wood-edge: #E39E7C;
+    --ink: #4A2C17; --ink-soft: #7A5640; --card: #FFF8EF; --title: #E4513A; --outline: #5A3A22;
+  }
+  /* Вариант 2 «Розовая кухня» — окно с занавесками, деревянная столешница, розовая скатерть */
+  :root[data-theme="2"] {
+    --wall: #F9D9E0; --wall-line: #FCE9EE; --wood: #FDE7EE; --wood-edge: #C98A52;
+    --ink: #4A2340; --ink-soft: #7D5672; --card: #FFFFFF; --title: #D6336C; --outline: #5C3048;
+    --font: "Comfortaa", "Trebuchet MS", sans-serif;
+  }
+  /* Вариант 3 «Зелёные тарелочки» — кремовый лист в зелёной рамке, продукты в тёмно-зелёных кругах */
+  :root[data-theme="3"] {
+    --wall: #FBF4E2; --wall-line: #CFE5B0; --wood: #FBF4E2; --wood-edge: #FBF4E2;
+    --ink: #233528; --ink-soft: #4E6650; --card: #FFFDF6; --title: #233528; --plate: #2F4B3A;
+    --font: "Rubik", "Trebuchet MS", sans-serif;
+  }
+
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background-color: var(--wall);
+    font-family: var(--font);
+    color: var(--ink);
+    user-select: none; -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: none;
+  }
+  #stage { position: absolute; left: 0; top: 0; width: 1600px; height: 1000px; transform-origin: 0 0; }
+  .screen { position: absolute; inset: 0; display: none; z-index: 1; }
+  .screen.on { display: block; }
+  button { font-family: inherit; color: inherit; }
+  button:focus-visible { outline: 6px solid var(--gold); outline-offset: 4px; }
+
+  /* ---------- Первый экран ---------- */
+  .big-title {
+    position: absolute; left: 0; right: 0; text-align: center; margin: 0;
+    font-size: 104px; font-weight: 900; line-height: 1; letter-spacing: -2px;
+    color: var(--title);
+  }
+  #start .big-title { top: 230px; left: 640px; right: 64px; }
+  #chefPic {
+    position: absolute; left: 96px; top: 96px; width: 520px; height: 880px;
+    display: grid; place-items: end center;
+  }
+  #chefPic img, #chefPic svg { max-width: 100%; max-height: 100%; }
+  #play {
+    position: absolute; left: 960px; top: 470px; width: 240px; height: 240px;
+    border-radius: 50%; border: 0; cursor: pointer; padding: 0;
+    background: var(--green); box-shadow: 0 12px 0 var(--green-dark);
+    display: grid; place-items: center;
+    animation: bob 1.6s ease-in-out infinite;
+  }
+  #play:active { transform: translateY(8px); box-shadow: 0 4px 0 var(--green-dark); animation: none; }
+
+  /* ---------- Меню ---------- */
+  #menu .big-title { top: 64px; font-size: 88px; }
+  #menu .sub { position: absolute; left: 0; right: 0; top: 176px; text-align: center; font-size: 44px; font-weight: 800; color: var(--ink-soft); }
+  .dishes { position: absolute; left: 0; right: 0; top: 248px; display: grid; grid-template-columns: repeat(6, 228px); justify-content: center; gap: 24px; }
+  .dish-card {
+    width: 228px; height: 300px; border: 0; border-radius: 32px; padding: 24px 0 0; cursor: pointer;
+    background: var(--card); box-shadow: 0 10px 0 rgba(150, 85, 30, .28);
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .dish-card:active { transform: translateY(6px); box-shadow: 0 4px 0 rgba(150, 85, 30, .28); }
+  .dish-card > svg { width: 164px; height: 164px; }
+  .dish-card.puz { background: var(--title); }
+  .dish-card.puz .name { color: #FFFFFF; }
+  .dish-card .name { font-size: 32px; font-weight: 900; line-height: 1; margin-top: 8px; }
+  .dish-card .stars { height: 32px; margin-top: 12px; display: flex; gap: 4px; }
+  .dish-card .stars svg { width: 30px; height: 30px; }
+
+  /* ---------- Кнопки сверху ---------- */
+  .round {
+    position: absolute; top: 24px; width: 96px; height: 96px; border-radius: 50%;
+    border: 0; padding: 0; cursor: pointer; background: var(--card);
+    box-shadow: 0 6px 0 rgba(150, 85, 30, .28);
+    display: grid; place-items: center; z-index: 50;
+  }
+  .round:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(150, 85, 30, .28); }
+  .round svg { width: 56px; height: 56px; }
+  #homeBtn { left: 24px; }
+  #muteBtn { left: 136px; }
+  #muteBtn.off .wave { display: none; }
+  #muteBtn:not(.off) .cross { display: none; }
+  #musicBtn.off .note { opacity: .35; }
+  #musicBtn:not(.off) .cross { display: none; }
+
+  /* ---------- кружок-подсказка: что нужно и как это пишется ---------- */
+  #hint {
+    position: absolute; left: 24px; top: 140px; width: 320px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    pointer-events: none;
+  }
+  #hint.off { display: none; }
+  #hintCircle {
+    width: 192px; height: 192px; border-radius: 50%; background: var(--card);
+    border: 8px solid var(--title); box-sizing: border-box;
+    display: grid; place-items: center;
+  }
+  #hintCircle svg { width: 132px; height: 132px; }
+  #hintWord {
+    font-size: 40px; font-weight: 900; line-height: 1; letter-spacing: 2px;
+    color: var(--ink); background: var(--card); border-radius: 16px; padding: 8px 16px 6px; white-space: nowrap;
+  }
+  #hintWord.long { font-size: 30px; }
+  #hint.change #hintCircle, #hint.change #hintWord { animation: popIn .4s ease-out; }
+
+  /* ---------- пазлы ---------- */
+  #pmenu .big-title { top: 64px; font-size: 88px; }
+  #pmenu .sub { position: absolute; left: 0; right: 0; top: 176px; text-align: center; font-size: 44px; font-weight: 800; color: var(--ink-soft); }
+  .pics { position: absolute; left: 0; right: 0; top: 280px; display: grid; grid-template-columns: repeat(3, 344px); justify-content: center; gap: 32px; }
+  .pic-card {
+    height: 300px; border: 0; border-radius: 32px; padding: 16px; cursor: pointer;
+    background: var(--card); box-shadow: 0 10px 0 rgba(150, 85, 30, .28);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+  }
+  .pic-card:active { transform: translateY(6px); box-shadow: 0 4px 0 rgba(150, 85, 30, .28); }
+  .pic-card .thumb { width: 312px; height: 234px; border-radius: 16px; overflow: hidden; display: block; }
+  .pic-card .thumb canvas { width: 100%; height: 100%; display: block; }
+  .pic-card .stars { height: 32px; display: flex; gap: 4px; }
+  .pic-card .stars svg { width: 30px; height: 30px; }
+  #pboard {
+    position: absolute; left: 460px; top: 200px; width: 680px; height: 510px;
+    background: rgba(120, 70, 30, .16); border-radius: 8px;
+  }
+  #pboard canvas { position: absolute; left: 0; top: 0; width: 680px; height: 510px; }
+  #pghost { opacity: .35; }
+  #plines { transition: opacity .6s; }
+  #pfull { opacity: 0; transition: opacity .8s; pointer-events: none; z-index: 900; border-radius: 4px; }
+  #pboard.done #plines { opacity: 0; }
+  #pboard.done #pfull { opacity: 1; }
+  #pword {
+    position: absolute; left: 460px; width: 680px; top: 740px; text-align: center;
+    font-size: 72px; font-weight: 900; line-height: 1; letter-spacing: 4px; color: var(--title);
+    opacity: 0; transition: opacity .6s;
+  }
+  #pword.on { opacity: 1; }
+  .piece { position: absolute; left: 0; top: 0; pointer-events: none; filter: drop-shadow(0 4px 3px rgba(50, 25, 5, .4)); will-change: transform; }
+  .piece.lift { filter: drop-shadow(0 14px 10px rgba(50, 25, 5, .4)); }
+  .piece.placed { filter: none; }
+  .piece.fly { transition: transform .7s cubic-bezier(.3, .8, .3, 1); }
+  .piece.snap { transition: transform .16s ease-out; }
+  #pdots { position: absolute; left: 460px; width: 680px; top: 140px; display: flex; justify-content: center; gap: 10px; pointer-events: none; }
+
+  #dots { position: absolute; left: 300px; right: 300px; top: 58px; display: flex; justify-content: center; gap: 10px; pointer-events: none; }
+  .dot { width: 24px; height: 24px; border-radius: 50%; background: rgba(150, 85, 30, .22); transition: background .25s, transform .25s; }
+  .dot.on { background: var(--gold); transform: scale(1.15); }
+  .dot.now { background: var(--red); transform: scale(1.3); }
+
+  /* ---------- Кухня ---------- */
+  #scene { position: absolute; left: 0; top: 0; width: 1600px; height: 1000px; touch-action: none; }
+  #shelf {
+    position: absolute; left: 0; right: 0; top: 808px; height: 176px;
+    display: flex; justify-content: center; align-items: center; gap: 16px;
+  }
+  .item {
+    width: 156px; height: 156px; border-radius: 28px; background: var(--card);
+    box-shadow: 0 8px 0 rgba(150, 85, 30, .3);
+    display: grid; place-items: center; cursor: grab; touch-action: none;
+    transition: opacity .2s, transform .2s;
+  }
+  .item svg { width: 124px; height: 124px; pointer-events: none; }
+  .item.taken { opacity: .25; }
+  .item.gone { transform: scale(0); opacity: 0; }
+  .item.idle { opacity: .55; }
+  .item.new { animation: popIn .4s ease-out backwards; }
+  .ghost { position: absolute; left: 0; top: 0; width: 150px; height: 150px; pointer-events: none; z-index: 80; filter: drop-shadow(0 16px 10px rgba(80, 40, 10, .35)); }
+  .ghost svg { width: 150px; height: 150px; }
+
+  #doneBtn {
+    position: absolute; left: 1420px; top: 600px; width: 150px; height: 150px; border-radius: 50%;
+    border: 0; padding: 0; cursor: pointer; background: var(--green); box-shadow: 0 10px 0 var(--green-dark);
+    display: none; place-items: center; z-index: 40;
+  }
+  #doneBtn.on { display: grid; animation: popIn .4s ease-out, bob 1.2s .4s ease-in-out infinite; }
+  #doneBtn:active { transform: translateY(6px); box-shadow: 0 4px 0 var(--green-dark); }
+
+  /* ---------- Победа ---------- */
+  #win {
+    position: absolute; inset: 0; display: none; z-index: 90;
+    background: rgba(59, 36, 20, .45);
+  }
+  #win.on { display: block; }
+  .win-card {
+    position: absolute; left: 480px; top: 100px; width: 640px; height: 800px;
+    background: var(--card); border-radius: 48px;
+    display: flex; flex-direction: column; align-items: center;
+    animation: winIn .5s cubic-bezier(.3, 1.5, .5, 1);
+  }
+  .win-stars { margin-top: 40px; display: flex; gap: 8px; }
+  .win-stars svg { width: 96px; height: 96px; animation: popIn .5s ease-out backwards; }
+  .win-stars svg:nth-child(2) { animation-delay: .15s; margin-top: -24px; }
+  .win-stars svg:nth-child(3) { animation-delay: .3s; }
+  #winPic { width: 300px; height: 300px; margin-top: 16px; display: grid; place-items: center; }
+  #winPic svg, #winPic img { max-width: 100%; max-height: 100%; }
+  .win-card h2 { margin: 16px 0 0; font-size: 80px; font-weight: 900; line-height: 1; color: var(--red); }
+  .win-card p { margin: 8px 0 0; font-size: 36px; font-weight: 800; color: var(--ink-soft); }
+  .win-btns { margin-top: 32px; display: flex; gap: 48px; }
+  .win-btns button {
+    width: 128px; height: 128px; border-radius: 50%; border: 0; padding: 0; cursor: pointer;
+    display: grid; place-items: center;
+  }
+  .win-btns button svg { width: 68px; height: 68px; }
+  #againBtn { background: var(--green); box-shadow: 0 8px 0 var(--green-dark); }
+  #menuBtn { background: var(--gold); box-shadow: 0 8px 0 var(--gold-dark); }
+  .win-btns button:active { transform: translateY(5px); box-shadow: none; }
+  #confetti { position: absolute; left: 0; top: 0; width: 1600px; height: 1000px; pointer-events: none; z-index: 95; }
+
+  /* ---------- Поверни телефон ---------- */
+  #rotate {
+    position: fixed; inset: 0; z-index: 999; display: none;
+    background: var(--wall); color: var(--ink);
+    flex-direction: column; align-items: center; justify-content: center; gap: 24px;
+    font-size: 28px; font-weight: 900; text-align: center; padding: 16px;
+  }
+  #rotate svg { width: 160px; height: 160px; animation: turn 2s ease-in-out infinite; }
+  @media (orientation: portrait) and (max-width: 900px) { #rotate { display: flex; } }
+
+  /* ---------- Анимации ---------- */
+  @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 70% { transform: scale(1.12); opacity: 1; } 100% { transform: scale(1); } }
+  @keyframes winIn { from { transform: scale(.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+  @keyframes turn { 0%, 30% { transform: rotate(0); } 60%, 100% { transform: rotate(-90deg); } }
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(0) scale(1); }
+    20% { transform: rotate(-9deg) scale(1.1); }
+    40% { transform: rotate(8deg) scale(1.1); }
+    60% { transform: rotate(-6deg) scale(1.05); }
+    80% { transform: rotate(4deg) scale(1.02); }
+  }
+  .wiggle { animation: wiggle .7s ease-in-out 2; }
+  @keyframes steam { 0% { transform: translateY(0) scale(.6); opacity: 0; } 30% { opacity: .75; } 100% { transform: translateY(-130px) scale(1.5); opacity: 0; } }
+  @keyframes flick { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(.85, 1.15); } }
+  @keyframes shake { 0%, 100% { transform: translate(0, 0); } 25% { transform: translate(-4px, 2px); } 75% { transform: translate(4px, -2px); } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes pulse { 0%, 100% { opacity: .75; } 50% { opacity: 1; } }
+  svg .fb { transform-box: fill-box; transform-origin: center; }
+  svg .steam { animation: steam 2.2s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+  svg .flame { animation: flick .35s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
+  svg .shake { animation: shake .09s linear infinite; }
+  svg .spin { animation: spin .5s linear infinite; transform-box: fill-box; transform-origin: center; }
+  svg .wiggle { transform-box: fill-box; transform-origin: center; }
+  svg .pulse { animation: pulse .8s ease-in-out infinite; }
+  @keyframes bub { 0% { transform: scale(0); opacity: 0; } 50% { opacity: .9; } 100% { transform: scale(1.3); opacity: 0; } }
+  svg .bub { animation: bub 1.2s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+
+  /* ---------- Варианты 1 и 2: тёмный контур, как у наклеек ---------- */
+  :root[data-theme="1"] #world > g, :root[data-theme="2"] #world > g { filter: url(#outline); }
+  :root[data-theme="1"] .item svg, :root[data-theme="1"] .ghost svg, :root[data-theme="1"] .dish-card > svg, :root[data-theme="1"] #hintCircle svg, :root[data-theme="1"] #winPic svg,
+  :root[data-theme="2"] .item svg, :root[data-theme="2"] .ghost svg, :root[data-theme="2"] .dish-card > svg, :root[data-theme="2"] #hintCircle svg, :root[data-theme="2"] #winPic svg {
+    filter: drop-shadow(2.5px 0 0 var(--outline)) drop-shadow(-2.5px 0 0 var(--outline)) drop-shadow(0 2.5px 0 var(--outline)) drop-shadow(0 -2.5px 0 var(--outline));
+  }
+  :root[data-theme="1"] .item, :root[data-theme="2"] .item, :root[data-theme="1"] .dish-card, :root[data-theme="2"] .dish-card,
+  :root[data-theme="1"] .pic-card, :root[data-theme="2"] .pic-card { border: 4px solid var(--outline); box-sizing: border-box; }
+  :root[data-theme="1"] #hintCircle { border-color: var(--outline); }
+  /* деревянные кнопки в варианте 1 */
+  :root[data-theme="1"] .round { border-radius: 24px; background: #C98A52; box-shadow: 0 6px 0 #8E5A2C; border: 4px solid var(--outline); box-sizing: border-box; }
+  :root[data-theme="1"] .round svg [fill]:not([fill="none"]) { fill: #FFF3E0; }
+  :root[data-theme="1"] .round svg [stroke] { stroke: #FFF3E0; }
+  :root[data-theme="1"] .big-title { color: var(--title); -webkit-text-stroke: 3px var(--outline); paint-order: stroke fill; }
+  :root[data-theme="2"] .big-title { font-weight: 700; }
+
+  /* ---------- Вариант 3: всё в тёмно-зелёных кругах ---------- */
+  :root[data-theme="3"] #stage::before {
+    content: ""; position: absolute; inset: 20px; border-radius: 40px; background: var(--wall); z-index: -1;
+  }
+  :root[data-theme="3"] .big-title {
+    left: 50%; right: auto; transform: translateX(-50%); white-space: nowrap; width: max-content;
+    background: #FFFDF6; border: 6px solid var(--plate); border-radius: 999px; padding: 16px 56px 12px;
+    font-size: 64px; text-transform: uppercase; letter-spacing: 2px;
+  }
+  :root[data-theme="3"] #start .big-title { top: 200px; left: 1080px; font-size: 56px; }
+  :root[data-theme="3"] #menu .big-title, :root[data-theme="3"] #pmenu .big-title { top: 56px; font-size: 60px; }
+  :root[data-theme="3"] .sub { text-transform: uppercase; letter-spacing: 1px; font-size: 36px; }
+  :root[data-theme="3"] .dish-card { background: transparent; box-shadow: none; padding-top: 0; }
+  :root[data-theme="3"] .dish-card > svg { background: var(--plate); border-radius: 50%; padding: 18px; box-sizing: border-box; width: 176px; height: 176px; }
+  :root[data-theme="3"] .dish-card .name { text-transform: uppercase; font-size: 30px; letter-spacing: 1px; }
+  :root[data-theme="3"] .dish-card.puz { background: transparent; }
+  :root[data-theme="3"] .dish-card.puz .name { color: var(--ink); }
+  :root[data-theme="3"] .item { background: var(--plate); border-radius: 50%; box-shadow: none; }
+  :root[data-theme="3"] #hintCircle { background: var(--plate); border-color: #CFE5B0; }
+  :root[data-theme="3"] #hintWord { background: transparent; }
+  :root[data-theme="3"] .round { background: var(--plate); box-shadow: none; }
+  :root[data-theme="3"] .round svg [fill]:not([fill="none"]) { fill: #FBF4E2; }
+  :root[data-theme="3"] .round svg [stroke] { stroke: #FBF4E2; }
+  :root[data-theme="3"] .pic-card { box-shadow: none; border: 6px solid var(--plate); }
+  :root[data-theme="3"] .win-card { border: 8px solid var(--plate); }
+  :root[data-theme="3"] .win-card h2 { text-transform: uppercase; }
+  :root[data-theme="3"] .dot.on { background: #8DBA5A; }
+  :root[data-theme="3"] .dot.now { background: var(--plate); }
+  #kitchenWindow { position: absolute; left: 0; top: 0; width: 1600px; height: 1000px; pointer-events: none; display: none; }
+  :root[data-theme="2"] #game.on ~ #kitchenWindow, :root[data-theme="2"] #game.on #kitchenWindow { display: block; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <filter id="outline" x="-5%" y="-5%" width="110%" height="110%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="3.5" result="fat"/>
+      <feFlood flood-color="#5A3A22"/>
+      <feComposite in2="fat" operator="in" result="line"/>
+      <feMerge><feMergeNode in="line"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </svg>
+
+  <section class="screen on" id="start">
+    <h1 class="big-title">Кухня Артёма</h1>
+    <div id="chefPic"></div>
+    <button id="play" aria-label="Играть">
+      <svg viewBox="0 0 100 100" width="120" height="120"><path d="M34 22 L80 50 L34 78 Z" fill="#FFF8EF" stroke="#FFF8EF" stroke-width="10" stroke-linejoin="round"/></svg>
+    </button>
+  </section>
+
+  <section class="screen" id="menu">
+    <h1 class="big-title">Кухня Артёма</h1>
+    <div class="sub">Что будем готовить?</div>
+    <div class="dishes" id="dishes"></div>
+  </section>
+
+  <section class="screen" id="game">
+    <svg id="kitchenWindow" viewBox="0 0 1600 1000" aria-hidden="true">
+      <clipPath id="glassView"><rect x="560" y="90" width="480" height="300" rx="8"/></clipPath>
+      <rect x="540" y="70" width="520" height="340" rx="18" fill="#FFFFFF"/>
+      <g clip-path="url(#glassView)">
+        <rect x="560" y="90" width="480" height="300" fill="#BFE6F7"/>
+        <circle cx="960" cy="150" r="34" fill="#FFD866"/>
+        <path d="M560 300 Q700 230 820 280 T1040 262 V390 H560Z" fill="#9ED37A"/>
+        <path d="M560 340 Q720 290 860 330 T1040 320 V390 H560Z" fill="#7FC25E"/>
+        <g fill="#F48FB1"><circle cx="620" cy="345" r="7"/><circle cx="700" cy="360" r="7"/><circle cx="900" cy="350" r="7"/><circle cx="980" cy="368" r="7"/></g>
+        <g fill="#FFFFFF"><circle cx="660" cy="368" r="6"/><circle cx="820" cy="372" r="6"/><circle cx="940" cy="335" r="6"/></g>
+        <g fill="#FFFFFF" opacity=".9"><circle cx="650" cy="150" r="20"/><circle cx="676" cy="140" r="26"/><circle cx="704" cy="152" r="18"/></g>
+      </g>
+      <rect x="795" y="90" width="10" height="300" fill="#FFFFFF"/><rect x="560" y="235" width="480" height="10" fill="#FFFFFF"/>
+      <rect x="516" y="400" width="568" height="24" rx="10" fill="#FFFFFF"/>
+      <rect x="466" y="40" width="668" height="16" rx="8" fill="#C98A52"/>
+      <path d="M476 52 H620 C600 170 560 260 610 440 H476 Z" fill="#F48FB1"/>
+      <path d="M1124 52 H980 C1000 170 1040 260 990 440 H1124 Z" fill="#F48FB1"/>
+      <path d="M512 60 C506 200 500 320 520 436 M560 60 C548 200 540 320 566 436 M1088 60 C1094 200 1100 320 1080 436 M1040 60 C1052 200 1060 320 1034 436" stroke="#EC7AA0" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <rect x="470" y="300" width="150" height="20" rx="10" fill="#D6336C"/><rect x="980" y="300" width="150" height="20" rx="10" fill="#D6336C"/>
+    </svg>
+    <svg id="scene" viewBox="0 0 1600 1000"><g id="world"></g></svg>
+    <div id="dots"></div>
+    <div id="shelf"></div>
+    <div id="hint" class="off"><div id="hintCircle"></div><div id="hintWord"></div></div>
+    <button id="doneBtn" aria-label="Готово">
+      <svg viewBox="0 0 100 100" width="88" height="88"><path d="M22 52 L42 72 L80 30" fill="none" stroke="#FFF8EF" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </section>
+
+  <section class="screen" id="pmenu">
+    <h1 class="big-title">Пазлы</h1>
+    <div class="sub">Выбери картинку</div>
+    <div class="pics" id="pics"></div>
+  </section>
+
+  <section class="screen" id="puzzle">
+    <div id="pdots"></div>
+    <div id="pboard"><canvas id="pghost"></canvas><canvas id="plines"></canvas><canvas id="pfull"></canvas></div>
+    <div id="pword"></div>
+  </section>
+
+  <section>
+    <div id="win">
+      <div class="win-card">
+        <div class="win-stars" id="winStars"></div>
+        <div id="winPic"></div>
+        <h2 id="winTitle">Вкусно!</h2>
+        <p id="winText">Ты настоящий повар!</p>
+        <div class="win-btns">
+          <button id="againBtn" aria-label="Ещё раз"><svg viewBox="0 0 100 100"><path d="M74 36 A30 30 0 1 0 80 58" fill="none" stroke="#FFF8EF" stroke-width="12" stroke-linecap="round"/><path d="M60 20 L82 34 L62 48 Z" fill="#FFF8EF" stroke="#FFF8EF" stroke-width="6" stroke-linejoin="round"/></svg></button>
+          <button id="menuBtn" aria-label="Выбрать другое блюдо"><svg viewBox="0 0 100 100"><rect x="14" y="14" width="30" height="30" rx="8" fill="#FFF8EF"/><rect x="56" y="14" width="30" height="30" rx="8" fill="#FFF8EF"/><rect x="14" y="56" width="30" height="30" rx="8" fill="#FFF8EF"/><rect x="56" y="56" width="30" height="30" rx="8" fill="#FFF8EF"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <button class="round hide" id="homeBtn" aria-label="К выбору блюд">
+    <svg viewBox="0 0 100 100"><path d="M14 50 L50 18 L86 50" fill="none" stroke="#E4513A" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M26 44 V82 H74 V44" fill="#E4513A"/><rect x="42" y="58" width="16" height="24" rx="4" fill="#FFF8EF"/></svg>
+  </button>
+  <button class="round" id="muteBtn" aria-label="Звук">
+    <svg viewBox="0 0 100 100"><path d="M18 40 H34 L54 22 V78 L34 60 H18 Z" fill="#3B2414"/><g class="wave" fill="none" stroke="#3B2414" stroke-width="8" stroke-linecap="round"><path d="M66 38 Q74 50 66 62"/><path d="M76 28 Q90 50 76 72"/></g><g class="cross" stroke="#E4513A" stroke-width="8" stroke-linecap="round"><path d="M66 38 L88 62"/><path d="M88 38 L66 62"/></g></svg>
+  </button>
+  <button class="round" id="musicBtn" aria-label="Музыка">
+    <svg viewBox="0 0 100 100"><g class="note" fill="#3B2414"><path d="M40 20 L80 12 V64" fill="none" stroke="#3B2414" stroke-width="8" stroke-linejoin="round"/><path d="M40 20 V72" stroke="#3B2414" stroke-width="8"/><ellipse cx="30" cy="74" rx="13" ry="10"/><ellipse cx="70" cy="66" rx="13" ry="10"/></g><g class="cross" stroke="#E4513A" stroke-width="8" stroke-linecap="round"><path d="M18 18 L84 84"/></g></svg>
+  </button>
+  <canvas id="confetti" width="1600" height="1000"></canvas>
+</div>
+
+<div id="rotate">
+  <svg viewBox="0 0 100 100"><rect x="30" y="10" width="40" height="80" rx="8" fill="#E4513A"/><rect x="35" y="18" width="30" height="58" rx="3" fill="#FFF8EF"/><circle cx="50" cy="83" r="3.5" fill="#FFF8EF"/></svg>
+  Поверни телефон боком
+</div>
+
+<script src="фразы.js"></script>
+<script>
+"use strict";
+// =====================================================================
+//  Кухня Артёма — игра-готовилка. Пять блюд: пицца, бургер, тортик,
+//  блинчики, фруктовый коктейль. Всё рисуется кодом (SVG), звуки
+//  синтезируются в браузере, голос — mp3 из папки audio.
+// =====================================================================
+
+const NS = "http://www.w3.org/2000/svg";
+const $ = id => document.getElementById(id);
+const stage = $("stage"), world = $("world"), scene = $("scene"), shelf = $("shelf");
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const rnd = (a, b) => a + Math.random() * (b - a);
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+
+function S_(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs || {}) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+// группа с готовой картинкой внутри; у самой группы трансформации нет — её можно анимировать
+function G_(parent, html, attrs) {
+  const g = S_("g", attrs, parent);
+  if (html) g.innerHTML = html;
+  return g;
+}
+// поставить картинку в точку: внешняя группа сдвигает, внутренняя (её и возвращаем) свободна для анимаций
+function place(parent, x, y, html, rot = 0, sc = 1) {
+  const o = S_("g", { transform: `translate(${x} ${y}) rotate(${rot}) scale(${sc})` }, parent);
+  const g = G_(o, html);
+  return g;
+}
+const easeOut = t => 1 - Math.pow(1 - t, 3);
+const backOut = t => { const c = 1.7; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); };
+function tween(ms, fn, ease = easeOut) {
+  return new Promise(res => {
+    const t0 = performance.now();
+    (function f(now) {
+      const t = Math.min(1, (now - t0) / ms);
+      fn(ease(t));
+      if (t < 1) requestAnimationFrame(f); else res();
+    })(t0);
+  });
+}
+function popIn(el, delay = 0, ms = 380) {
+  el.classList.add("fb");
+  return el.animate([
+    { transform: "scale(0)", opacity: 0 },
+    { transform: "scale(1.15)", opacity: 1, offset: .7 },
+    { transform: "scale(1)", opacity: 1 }
+  ], { duration: ms, delay, easing: "ease-out", fill: "backwards" }).finished;
+}
+function dropIn(el, from = -280) {
+  return el.animate([
+    { transform: `translateY(${from}px)`, opacity: 0 },
+    { transform: "translateY(12px)", opacity: 1, offset: .75 },
+    { transform: "translateY(0)", opacity: 1 }
+  ], { duration: 480, easing: "ease-in" }).finished;
+}
+function fadeOut(el, ms = 400) {
+  return el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: ms, fill: "forwards" }).finished;
+}
+function wiggle(el) {
+  if (!el) return;
+  el.classList.remove("wiggle"); void el.getBoundingClientRect(); el.classList.add("wiggle");
+  setTimeout(() => el.classList.remove("wiggle"), 1500);
+}
+function ring(cx, cy, r, n, f, a0 = 0) {
+  let s = "";
+  for (let i = 0; i < n; i++) {
+    const a = a0 + i / n * 2 * Math.PI;
+    s += f(cx + r * Math.cos(a), cy + r * Math.sin(a), a * 180 / Math.PI, i);
+  }
+  return s;
+}
+function spiral(R, turns = 3) {
+  let d = "";
+  for (let i = 0; i <= 120; i++) {
+    const t = i / 120, a = t * turns * 2 * Math.PI, r = R * t;
+    d += (i ? "L" : "M") + (r * Math.cos(a)).toFixed(1) + " " + (r * Math.sin(a)).toFixed(1) + " ";
+  }
+  return d;
+}
+function hexMix(cols) {
+  const c = cols.map(h => [1, 3, 5].map(i => parseInt(h.substr(i, 2), 16)));
+  const avg = [0, 1, 2].map(k => c.reduce((s, x) => s + x[k], 0) / c.length);
+  return "#" + avg.map(v => Math.round(v).toString(16).padStart(2, "0")).join("");
+}
+// сок после блендера: цвет смеси, но ярче и светлее — чтобы не выходил серым
+function juicy(hex) {
+  let [r, g, b] = [1, 3, 5].map(i => parseInt(hex.substr(i, 2), 16) / 255);
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+  let h = 0;
+  if (mx !== mn) {
+    const d = mx - mn;
+    h = mx === r ? ((g - b) / d + (g < b ? 6 : 0)) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+    h /= 6;
+  }
+  const s = .72, l = .68;
+  const f = n => { const k = (n + h * 12) % 12, a = s * Math.min(l, 1 - l); return l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)); };
+  return "#" + [0, 8, 4].map(n => Math.round(f(n) * 255).toString(16).padStart(2, "0")).join("");
+}
+function lighten(hex, k) {
+  const c = [1, 3, 5].map(i => parseInt(hex.substr(i, 2), 16));
+  return "#" + c.map(v => Math.round(v + (255 - v) * k).toString(16).padStart(2, "0")).join("");
+}
+
+// =====================================================================
+//  ЗВУКИ — синтезируются, файлов не нужно
+// =====================================================================
+let AC = null, NOISE = null;
+function ac() {
+  if (!AC) {
+    AC = new (window.AudioContext || window.webkitAudioContext)();
+    NOISE = AC.createBuffer(1, AC.sampleRate * 2, AC.sampleRate);
+    const d = NOISE.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  if (AC.state === "suspended") AC.resume();
+  return AC;
+}
+function tone(f1, f2, dur, type = "sine", vol = .3, delay = 0) {
+  if (G.muted) return;
+  const a = ac(), t = a.currentTime + delay;
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = type; o.frequency.setValueAtTime(f1, t);
+  o.frequency.exponentialRampToValueAtTime(Math.max(20, f2), t + dur);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t + .01);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(a.destination); o.start(t); o.stop(t + dur + .05);
+}
+function noise(dur, vol = .2, type = "lowpass", f1 = 1000, f2 = null, delay = 0, q = 1) {
+  if (G.muted) return;
+  const a = ac(), t = a.currentTime + delay;
+  const s = a.createBufferSource(), fl = a.createBiquadFilter(), g = a.createGain();
+  s.buffer = NOISE; fl.type = type; fl.Q.value = q;
+  fl.frequency.setValueAtTime(f1, t);
+  if (f2) fl.frequency.exponentialRampToValueAtTime(f2, t + dur);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t + .02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  s.connect(fl).connect(g).connect(a.destination); s.start(t, Math.random()); s.stop(t + dur + .05);
+}
+function bell(f, dur = .8, vol = .25, delay = 0) {
+  tone(f, f, dur, "sine", vol, delay);
+  tone(f * 2, f * 2, dur * .5, "sine", vol * .3, delay);
+}
+const SFX = {
+  pop() { tone(500, 900, .12, "sine", .35); },
+  drop() { tone(220, 110, .18, "sine", .45); noise(.08, .12, "lowpass", 900); },
+  whoosh() { noise(.35, .16, "bandpass", 500, 2400, 0, 1.5); },
+  ding() { bell(1318, 1.1, .3); bell(1760, 1.1, .2, .14); },
+  tick() { tone(1900, 1900, .03, "square", .05); },
+  crack() { noise(.05, .45, "highpass", 1800); noise(.06, .3, "bandpass", 3000, null, .07, 2); },
+  pour() { noise(1.0, .14, "lowpass", 700, 1400, 0, 4); },
+  squirt() { noise(.35, .2, "bandpass", 1400, 500, 0, 2); },
+  chop() { noise(.05, .35, "highpass", 2200); tone(320, 140, .07, "triangle", .2); },
+  roll() { noise(.3, .22, "lowpass", 350, 700); },
+  nom() { tone(280, 170, .1, "sine", .45); tone(250, 160, .1, "sine", .45, .15); },
+  slurp() { noise(.45, .22, "bandpass", 500, 2000, 0, 3); },
+  puff() { noise(.35, .3, "lowpass", 800, 200); },
+  boing() { tone(320, 140, .25, "triangle", .2); },
+  sprinkle() { for (let i = 0; i < 6; i++) tone(rnd(1800, 3200), 2600, .04, "sine", .08, i * .07); },
+  sparkle() { [1568, 1976, 2349, 3136].forEach((f, i) => bell(f, .35, .12, i * .07)); },
+  fanfare() { [523, 659, 784, 1047].forEach((f, i) => { tone(f, f, i === 3 ? .7 : .18, "triangle", .25, i * .16); }); },
+  flip() { tone(300, 900, .2, "sine", .25); },
+};
+// длинные звуки: шипение сковородки и мотор миксера — возвращают «выключатель»
+function loopSizzle() {
+  if (G.muted) return () => {};
+  const a = ac(), s = a.createBufferSource(), fl = a.createBiquadFilter(), g = a.createGain();
+  s.buffer = NOISE; s.loop = true; fl.type = "highpass"; fl.frequency.value = 3500;
+  g.gain.value = 0; g.gain.linearRampToValueAtTime(.06, a.currentTime + .3);
+  s.connect(fl).connect(g).connect(a.destination); s.start();
+  const crackle = setInterval(() => noise(.03, rnd(.03, .09), "highpass", 4000), 110);
+  const stop = () => { clearInterval(crackle); g.gain.linearRampToValueAtTime(0, a.currentTime + .3); setTimeout(() => s.stop(), 400); };
+  G.loops.push(stop); return stop;
+}
+function loopMotor(base = 95) {
+  if (G.muted) return () => {};
+  const a = ac(), o = a.createOscillator(), fl = a.createBiquadFilter(), g = a.createGain();
+  const lfo = a.createOscillator(), lg = a.createGain();
+  o.type = "sawtooth"; o.frequency.value = base; fl.type = "lowpass"; fl.frequency.value = 900;
+  lfo.frequency.value = 18; lg.gain.value = 12; lfo.connect(lg).connect(o.frequency);
+  g.gain.value = 0; g.gain.linearRampToValueAtTime(.1, a.currentTime + .15);
+  o.connect(fl).connect(g).connect(a.destination); o.start(); lfo.start();
+  const stop = () => { g.gain.linearRampToValueAtTime(0, a.currentTime + .15); setTimeout(() => { o.stop(); lfo.stop(); }, 250); };
+  G.loops.push(stop); return stop;
+}
+// «С днём рождения» — музыкальная шкатулка
+function birthdaySong() {
+  const N = { G4: 392, A4: 440, B4: 494, C5: 523, D5: 587, E5: 659, F5: 698, G5: 784 };
+  const tune = [["G4", .75], ["G4", .25], ["A4", 1], ["G4", 1], ["C5", 1], ["B4", 2],
+                ["G4", .75], ["G4", .25], ["A4", 1], ["G4", 1], ["D5", 1], ["C5", 2]];
+  const beat = .4; let t = 0;
+  for (const [n, d] of tune) { bell(N[n], d * beat + .3, .22, t); t += d * beat; }
+  return t * 1000;
+}
+
+// =====================================================================
+//  ГОЛОС
+// =====================================================================
+const V = { audio: null, res: null };
+function stopVoice() {
+  if (V.audio) { V.audio.onended = V.audio.onerror = null; V.audio.pause(); V.audio = null; }
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  if (V.res) { const r = V.res; V.res = null; r(); }
+}
+function say(key) {
+  stopVoice();
+  if (!key || G.muted) return Promise.resolve();
+  duck(true);
+  return new Promise(res => {
+    let done = false, fell = false;
+    const fin = () => { if (!done) { done = true; if (V.res === fin) V.res = null; duck(false); res(); } };
+    V.res = fin;
+    const a = new Audio("audio/" + key + ".mp3");
+    V.audio = a;
+    const fallback = () => {
+      if (fell || done) return; fell = true;
+      speakTTS(PHRASES[key] || "").then(fin);
+    };
+    a.onended = fin; a.onerror = fallback;
+    a.play().catch(fallback);
+  });
+}
+// запасной голос браузера — если нет mp3
+function speakTTS(text) {
+  return new Promise(res => {
+    if (!window.speechSynthesis || !text) return res();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "ru-RU"; u.rate = 1; u.pitch = 1.2;
+    u.onend = u.onerror = () => res();
+    speechSynthesis.speak(u);
+    setTimeout(res, 800 + text.length * 90);
+  });
+}
+let lastPraise = "";
+function praise() {
+  let k; do { k = pick(["p1", "p2", "p3", "p4", "p5", "p6"]); } while (k === lastPraise);
+  lastPraise = k; return say(k);
+}
+
+// =====================================================================
+//  КАРТИНКИ ПРОДУКТОВ НА ПОЛКЕ (viewBox 0 0 100 100)
+// =====================================================================
+const bottle = (c, cap) => `
+  <rect x="41" y="6" width="18" height="12" rx="4" fill="${cap}"/>
+  <path d="M43 16h14v10l10 11v47a9 9 0 0 1-9 9H43a9 9 0 0 1-9-9V37l9-11z" fill="${c}"/>
+  <rect x="38" y="50" width="24" height="24" rx="6" fill="#FFF1DC"/>
+  <circle cx="50" cy="63" r="7" fill="${c}"/>
+  <path d="M46 55q4 3 8 0" stroke="#3F9B47" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <rect x="38" y="36" width="5" height="44" rx="2.5" fill="#fff" opacity=".3"/>`;
+const ICON = {
+  dough: `<ellipse cx="50" cy="64" rx="40" ry="26" fill="#E3B676"/><ellipse cx="50" cy="58" rx="38" ry="25" fill="#F6DCAE"/><ellipse cx="37" cy="49" rx="13" ry="6" fill="#FDF0D8"/><circle cx="62" cy="64" r="2" fill="#E3B676"/><circle cx="54" cy="70" r="2" fill="#E3B676"/>`,
+  sauce: bottle("#D9412F", "#3E9B47"),
+  ketchup: bottle("#C8231C", "#F6B92B"),
+  cheese: `<path d="M10 52 L62 24 L92 42 Z" fill="#FFDD66"/><path d="M10 52 L92 42 L92 80 L10 86 Z" fill="#F5BE34"/><ellipse cx="32" cy="68" rx="7" ry="6" fill="#DDA024"/><ellipse cx="62" cy="62" rx="5" ry="5" fill="#DDA024"/><ellipse cx="80" cy="72" rx="4" ry="4" fill="#DDA024"/><ellipse cx="56" cy="38" rx="6" ry="3" fill="#F2C743"/>`,
+  salami: `<circle cx="50" cy="52" r="38" fill="#A82A24"/><circle cx="50" cy="52" r="32" fill="#D0423A"/>` + [[36, 38], [60, 36], [68, 56], [44, 64], [56, 72], [32, 56], [52, 50]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3.6" fill="#F5B8A8"/>`).join(""),
+  tomato: `<circle cx="50" cy="57" r="35" fill="#E43F2E"/><ellipse cx="37" cy="45" rx="10" ry="6" fill="#F58066"/><path d="M50 31c-6-8-14-8-18-6 6 1 9 4 11 7-6 0-10 3-12 6 6-1 12-1 19-2 7 1 13 1 19 2-2-3-6-6-12-6 2-3 5-6 11-7-4-2-12-2-18 6z" fill="#3E9B47"/><rect x="48" y="14" width="4" height="16" rx="2" fill="#3E9B47"/>`,
+  mushroom: `<rect x="38" y="48" width="24" height="38" rx="10" fill="#F2E2C8"/><path d="M12 56 Q12 16 50 16 Q88 16 88 56 Z" fill="#C79566"/><path d="M12 56 Q50 66 88 56 Q50 48 12 56Z" fill="#E7CFAE"/><ellipse cx="36" cy="32" rx="11" ry="5" fill="#D8AE84"/>`,
+  bunB: `<path d="M8 46h84v12a24 24 0 0 1-24 24H32A24 24 0 0 1 8 58z" fill="#DE9248"/><rect x="8" y="40" width="84" height="14" rx="7" fill="#F7D59A"/>`,
+  bunT: `<path d="M8 72Q8 22 50 22Q92 22 92 72Z" fill="#E39A4F"/><rect x="8" y="64" width="84" height="12" rx="6" fill="#D8873E"/><path d="M24 44Q32 32 46 30" stroke="#F2B878" stroke-width="6" fill="none" stroke-linecap="round"/>` + [[40, 40, -20], [58, 34, 15], [70, 46, 30], [52, 50, -5], [30, 56, -30], [76, 60, 10]].map(([x, y, r]) => `<ellipse cx="${x}" cy="${y}" rx="4.5" ry="2.6" fill="#FFF1D2" transform="rotate(${r} ${x} ${y})"/>`).join(""),
+  patty: `<ellipse cx="50" cy="58" rx="40" ry="24" fill="#B8505A"/><ellipse cx="50" cy="53" rx="39" ry="21" fill="#D96A74"/><circle cx="36" cy="50" r="3" fill="#EFA0A6"/><circle cx="58" cy="46" r="3" fill="#EFA0A6"/><circle cx="64" cy="58" r="3" fill="#EFA0A6"/><circle cx="44" cy="60" r="3" fill="#EFA0A6"/>`,
+  lettuce: `<path d="M12 60 C10 40 26 26 40 32 C46 18 64 18 70 30 C84 26 94 42 88 56 C94 68 80 82 66 76 C58 86 40 86 34 76 C20 80 8 72 12 60Z" fill="#7CC04E"/><path d="M28 68 Q50 52 76 44 M46 60 L43 44 M60 54 L64 38" stroke="#5DA23B" stroke-width="4" fill="none" stroke-linecap="round"/>`,
+  pickle: `<g transform="rotate(-30 50 46)"><rect x="8" y="32" width="78" height="28" rx="14" fill="#4E9A3C"/><rect x="18" y="38" width="56" height="5" rx="2.5" fill="#79BE5C"/></g><circle cx="72" cy="72" r="16" fill="#5A9A33"/><circle cx="72" cy="72" r="12" fill="#B8DC7E"/><circle cx="68" cy="70" r="1.8" fill="#5A9A33"/><circle cx="76" cy="70" r="1.8" fill="#5A9A33"/><circle cx="72" cy="76" r="1.8" fill="#5A9A33"/>`,
+  flour: `<path d="M24 28 L76 28 L84 90 L16 90 Z" fill="#EFE2CC"/><path d="M24 28 L32 12 L68 12 L76 28Z" fill="#DCC7A6"/><path d="M50 82V44" stroke="#D49B33" stroke-width="4" stroke-linecap="round"/>` + [48, 57, 66].map(y => `<ellipse cx="44" cy="${y}" rx="4" ry="7" fill="#E3AE45" transform="rotate(-30 44 ${y})"/><ellipse cx="56" cy="${y}" rx="4" ry="7" fill="#E3AE45" transform="rotate(30 56 ${y})"/>`).join("") + `<ellipse cx="50" cy="40" rx="4" ry="7" fill="#E3AE45"/>`,
+  sugar: `<rect x="24" y="30" width="20" height="20" rx="4" fill="#FFFFFF" stroke="#DCD3C6" stroke-width="2"/><rect x="44" y="24" width="20" height="20" rx="4" fill="#FFFFFF" stroke="#DCD3C6" stroke-width="2" transform="rotate(12 54 34)"/><rect x="58" y="34" width="20" height="20" rx="4" fill="#FFFFFF" stroke="#DCD3C6" stroke-width="2"/><path d="M10 50 h80 a40 36 0 0 1 -80 0z" fill="#6FB3DD"/><path d="M22 62 Q30 76 44 80" stroke="#9ED0EC" stroke-width="5" fill="none" stroke-linecap="round"/>`,
+  egg: `<ellipse cx="50" cy="55" rx="29" ry="37" fill="#EDCB98"/><ellipse cx="40" cy="40" rx="8" ry="12" fill="#F8E4C4"/>`,
+  // бутылка молока с коровой на этикетке
+  milk: `<path d="M39 12 h22 v8 q0 6 7 13 q9 9 9 21 v34 a10 10 0 0 1 -10 10 h-34 a10 10 0 0 1 -10 -10 v-34 q0 -12 9 -21 q7 -7 7 -13z" fill="#FFFFFF" stroke="#8DB9E2" stroke-width="4"/>
+    <rect x="36" y="4" width="28" height="12" rx="4" fill="#4A90D9"/>
+    <circle cx="50" cy="68" r="22" fill="#CFE6F7"/>
+    <ellipse cx="34" cy="60" rx="7" ry="4" fill="#FFFFFF" stroke="#3B2414" stroke-width="2" transform="rotate(-20 34 60)"/>
+    <ellipse cx="66" cy="60" rx="7" ry="4" fill="#FFFFFF" stroke="#3B2414" stroke-width="2" transform="rotate(20 66 60)"/>
+    <path d="M41 52 q-2 -6 2 -8 M59 52 q2 -6 -2 -8" stroke="#E0B97A" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <ellipse cx="50" cy="66" rx="13" ry="14" fill="#FFFFFF" stroke="#3B2414" stroke-width="2"/>
+    <path d="M40 58 q4 -6 10 -4 q-2 6 -8 8z" fill="#3B2414"/>
+    <circle cx="45" cy="64" r="2.2" fill="#3B2414"/><circle cx="55" cy="64" r="2.2" fill="#3B2414"/>
+    <ellipse cx="50" cy="75" rx="10" ry="6.5" fill="#F6B7C1"/>
+    <circle cx="46" cy="75" r="1.8" fill="#C9777F"/><circle cx="54" cy="75" r="1.8" fill="#C9777F"/>`,
+  cream: `<path d="M20 30 L80 30 L55 82 L45 82Z" fill="#7EC4E3"/><path d="M45 82 L55 82 L53 94 L47 94Z" fill="#B9C2CA"/><path d="M22 32c-5-12 9-18 15-11 2-11 20-11 24-2 7-7 20-2 17 13z" fill="#F8C4D2"/><path d="M30 44 L42 74" stroke="#A9DCF0" stroke-width="5" stroke-linecap="round"/>`,
+  candles: `<rect x="22" y="44" width="14" height="44" rx="4" fill="#6EC1E4"/><rect x="43" y="36" width="14" height="52" rx="4" fill="#F49CB8"/><rect x="64" y="44" width="14" height="44" rx="4" fill="#F7CF45"/>` +
+    [[29, 44], [50, 36], [71, 44]].map(([x, y]) => `<path d="M${x} ${y - 20}c6 7 7 12 0 17c-7-5-6-10 0-17z" fill="#FF9F1C"/><path d="M${x} ${y - 12}c3 3 3 6 0 8c-3-2-3-5 0-8z" fill="#FFE27A"/>`).join("") +
+    `<path d="M22 56 L36 52 M22 70 L36 66 M43 50 L57 46 M43 66 L57 62 M64 56 L78 52 M64 70 L78 66" stroke="#fff" stroke-width="3" opacity=".7"/>`,
+  strawberry: `<path d="M50 90 C24 76 14 52 22 38 C28 28 42 28 50 33 C58 28 72 28 78 38 C86 52 76 76 50 90Z" fill="#E8384F"/><path d="M30 31 L42 35 L50 22 L58 35 L70 31 L63 42 L50 39 L37 42Z" fill="#3E9B47"/>` + [[36, 50], [50, 48], [64, 50], [42, 62], [58, 62], [50, 74], [32, 60], [68, 60]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="2" ry="3" fill="#FFE38A"/>`).join(""),
+  blueberry: [[34, 62], [66, 62], [50, 36]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="19" fill="#4B55A8"/><circle cx="${x - 6}" cy="${y - 6}" r="5" fill="#7480CE"/><path d="M${x - 5} ${y - 14} l5 4 l5 -4" stroke="#2E3578" stroke-width="3" fill="none" stroke-linecap="round"/>`).join(""),
+  sprinkles: `<rect x="28" y="30" width="44" height="60" rx="12" fill="#F7D6E0"/><rect x="26" y="16" width="48" height="18" rx="6" fill="#B9C2CA"/><circle cx="40" cy="25" r="2.5" fill="#8A949C"/><circle cx="50" cy="25" r="2.5" fill="#8A949C"/><circle cx="60" cy="25" r="2.5" fill="#8A949C"/>` +
+    [[38, 44, 30, "#E4513A"], [56, 42, -20, "#3E9B4F"], [46, 56, 60, "#4A90D9"], [62, 58, 10, "#F6B92B"], [38, 70, -40, "#9C5BD0"], [54, 74, 40, "#E4513A"], [64, 74, -10, "#4A90D9"]].map(([x, y, r, c]) => `<rect x="${x - 6}" y="${y - 2.5}" width="12" height="5" rx="2.5" fill="${c}" transform="rotate(${r} ${x} ${y})"/>`).join(""),
+  chocolate: `<g transform="rotate(-12 50 50)"><rect x="22" y="14" width="56" height="74" rx="6" fill="#6B3B22"/>` + [0, 1].map(i => [0, 1, 2].map(j => `<rect x="${27 + i * 25}" y="${19 + j * 22}" width="21" height="18" rx="3" fill="#855033"/>`).join("")).join("") + `<path d="M22 58h56v24a6 6 0 0 1-6 6H28a6 6 0 0 1-6-6z" fill="#E4513A"/><path d="M22 58 l8 6 l8 -6 l8 6 l8 -6 l8 6 l8 -6 l8 6" stroke="#FFF1DC" stroke-width="3" fill="none"/></g>`,
+  honey: `<path d="M20 44 Q18 90 50 90 Q82 90 80 44Z" fill="#F2A93B"/><rect x="16" y="34" width="68" height="14" rx="7" fill="#C9792A"/><path d="M30 48 q5 16 0 18 q-5 -2 0 -18" fill="#FFD27A"/><rect x="46" y="10" width="8" height="28" rx="4" fill="#B98A5A"/><path d="M28 64 Q34 78 48 82" stroke="#F8C76A" stroke-width="5" fill="none" stroke-linecap="round"/>`,
+  jam: `<rect x="24" y="34" width="52" height="56" rx="12" fill="#C9283F"/><rect x="20" y="20" width="60" height="18" rx="6" fill="#F4F0E6"/><circle cx="32" cy="29" r="3" fill="#E4513A"/><circle cx="44" cy="29" r="3" fill="#E4513A"/><circle cx="56" cy="29" r="3" fill="#E4513A"/><circle cx="68" cy="29" r="3" fill="#E4513A"/><rect x="33" y="52" width="34" height="24" rx="5" fill="#FFF1DC"/><path d="M50 72 C42 68 40 62 43 58 C46 55 49 56 50 58 C51 56 54 55 57 58 C60 62 58 68 50 72Z" fill="#E8384F"/>`,
+  sourcream: `<path d="M20 42 L80 42 L73 88 L27 88 Z" fill="#7FC7E8"/><path d="M18 42c0-11 13-13 17-8 4-9 24-9 30 0 6-5 17-1 17 8z" fill="#FFFFFF" stroke="#D5E2EA" stroke-width="2"/><rect x="34" y="56" width="32" height="18" rx="4" fill="#FFFFFF" opacity=".75"/>`,
+  banana: `<path d="M16 28 C18 66 46 88 86 76 C88 72 86 69 81 69 C52 72 34 56 28 26Z" fill="#F7D33E"/><path d="M27 30 C30 52 46 66 72 70" stroke="#E2B52A" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M14 30 l4-12 l9 7z" fill="#7A5A2E"/><circle cx="85" cy="73" r="3.5" fill="#7A5A2E"/>`,
+  kiwi: `<circle cx="50" cy="52" r="38" fill="#8A6A3B"/><circle cx="50" cy="52" r="33" fill="#8CC63F"/><circle cx="50" cy="52" r="11" fill="#EEF4D2"/>` + ring(50, 52, 18, 12, (x, y, a) => `<ellipse cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="1.8" ry="3.2" fill="#2B2B1F" transform="rotate(${(a + 90).toFixed(0)} ${x.toFixed(1)} ${y.toFixed(1)})"/>`),
+  orange: `<circle cx="50" cy="52" r="38" fill="#F08C10"/><circle cx="50" cy="52" r="33" fill="#FFE2A8"/>` + ring(50, 52, 0, 8, (x, y, a, i) => { const a1 = (i / 8) * 2 * Math.PI + .08, a2 = ((i + 1) / 8) * 2 * Math.PI - .08, r = 29; return `<path d="M50 52 L${(50 + r * Math.cos(a1)).toFixed(1)} ${(52 + r * Math.sin(a1)).toFixed(1)} A${r} ${r} 0 0 1 ${(50 + r * Math.cos(a2)).toFixed(1)} ${(52 + r * Math.sin(a2)).toFixed(1)}Z" fill="#FFA733"/>`; }),
+  straw: `<path d="M40 92 L52 28 L76 14" stroke="#E4513A" stroke-width="13" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M40 92 L52 28 L76 14" stroke="#FFF8EF" stroke-width="13" fill="none" stroke-dasharray="7 9" stroke-linejoin="round"/>`,
+};
+// инструменты — для кружка-подсказки
+Object.assign(ICON, {
+  pin: `<g transform="rotate(-25 50 50)"><rect x="4" y="44" width="18" height="12" rx="6" fill="#A86C38"/><rect x="78" y="44" width="18" height="12" rx="6" fill="#A86C38"/><rect x="18" y="38" width="64" height="24" rx="12" fill="#E2B27A"/><rect x="24" y="42" width="52" height="5" rx="2.5" fill="#F0CB9A"/></g>`,
+  oven: `<rect x="16" y="14" width="68" height="76" rx="10" fill="#5BB5A2"/><rect x="16" y="14" width="68" height="18" rx="9" fill="#4FA391"/><circle cx="28" cy="23" r="4" fill="#F7F3EC"/><circle cx="40" cy="23" r="4" fill="#F7F3EC"/><rect x="24" y="40" width="52" height="42" rx="6" fill="#2F2A28"/><rect x="28" y="44" width="44" height="34" rx="4" fill="#FF9B3D"/>`,
+  cutter: `<g transform="rotate(-40 50 50)"><path d="M46 8 C62 14 62 40 58 58 H42 Z" fill="#D5DADF"/><path d="M46 8 C54 14 56 36 54 58 H50 Z" fill="#EEF1F3"/><rect x="40" y="56" width="20" height="38" rx="8" fill="#A86C38"/><circle cx="50" cy="68" r="2.5" fill="#F0CB9A"/><circle cx="50" cy="82" r="2.5" fill="#F0CB9A"/></g>`,
+  pan: `<rect x="62" y="44" width="34" height="12" rx="6" fill="#6B4A33"/><ellipse cx="38" cy="54" rx="34" ry="16" fill="#2C2C31"/><ellipse cx="38" cy="50" rx="34" ry="15" fill="#3A3A40"/><ellipse cx="38" cy="51" rx="28" ry="11" fill="#55565C"/>`,
+  mixer: `<rect x="34" y="52" width="5" height="34" rx="2.5" fill="#C9CDD2"/><rect x="50" y="52" width="5" height="34" rx="2.5" fill="#C9CDD2"/><ellipse cx="36" cy="86" rx="7" ry="4" fill="none" stroke="#C9CDD2" stroke-width="3"/><ellipse cx="53" cy="86" rx="7" ry="4" fill="none" stroke="#C9CDD2" stroke-width="3"/><rect x="14" y="30" width="66" height="26" rx="13" fill="#F27C6B"/><path d="M28 30 Q48 6 70 30" stroke="#E4513A" stroke-width="9" fill="none" stroke-linecap="round"/>`,
+  whisk: `<rect x="44" y="6" width="12" height="36" rx="6" fill="#C9792A"/><path d="M46 40 C20 60 30 94 50 94 C70 94 80 60 54 40" stroke="#8A949C" stroke-width="4" fill="none"/><path d="M48 40 C36 60 40 92 50 92 C60 92 64 60 52 40" stroke="#8A949C" stroke-width="4" fill="none"/>`,
+  bowl: `<path d="M8 44 Q10 88 50 88 Q90 88 92 44 Z" fill="#6FB3DD"/><ellipse cx="50" cy="44" rx="42" ry="12" fill="#5FA3CD"/><ellipse cx="50" cy="44" rx="36" ry="9" fill="#F4D58A"/>`,
+  blender: `<path d="M26 12 L74 12 L66 70 L34 70 Z" fill="#E3F2F8" stroke="#3F4A54" stroke-width="4"/><path d="M30 40 L70 40 L66 70 L34 70 Z" fill="#F0A0A8"/><rect x="22" y="6" width="56" height="10" rx="4" fill="#3F4A54"/><rect x="28" y="70" width="44" height="22" rx="7" fill="#E4513A"/><circle cx="50" cy="81" r="5" fill="#FFF8EF"/>`,
+  blow: `<rect x="40" y="44" width="20" height="48" rx="5" fill="#F49CB8"/><rect x="48" y="34" width="4" height="12" fill="#3B2414"/><path d="M50 8 c10 11 11 19 0 27 c-11 -8 -10 -16 0 -27z" fill="#FF9F1C"/><path d="M50 20 c4 5 5 9 0 12 c-5 -3 -4 -7 0 -12z" fill="#FFE27A"/>`,
+  eat: `<rect x="26" y="10" width="6" height="34" rx="3" fill="#8A949C"/><rect x="36" y="10" width="6" height="34" rx="3" fill="#8A949C"/><rect x="46" y="10" width="6" height="34" rx="3" fill="#8A949C"/><path d="M26 40 h26 v6 a8 8 0 0 1 -8 8 h-2 v36 a4 4 0 0 1 -8 0 v-36 h-2 a8 8 0 0 1 -6 -8z" fill="#8A949C"/><ellipse cx="72" cy="30" rx="12" ry="18" fill="#8A949C"/><rect x="68" y="44" width="8" height="48" rx="4" fill="#8A949C"/>`,
+  glass: `<path d="M24 18 L76 18 L68 92 L32 92 Z" fill="#E3F2F8" stroke="#8DB9E2" stroke-width="4"/><path d="M28 40 L72 40 L68 88 L32 88 Z" fill="#F0A0A8"/><path d="M54 88 L62 10 L80 2" stroke="#E4513A" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`,
+  star: `<path d="M50 6 L62 36 L94 38 L69 58 L78 90 L50 72 L22 90 L31 58 L6 38 L38 36Z" fill="#F6B92B"/>`,
+});
+// как пишется: для кружка-подсказки (печатными буквами — так дети учат их первыми)
+const NAME = {
+  dough: "ТЕСТО", sauce: "СОУС", ketchup: "КЕТЧУП", cheese: "СЫР", salami: "КОЛБАСА", tomato: "ПОМИДОР", mushroom: "ГРИБЫ",
+  bunB: "БУЛОЧКА", bunT: "БУЛОЧКА", patty: "КОТЛЕТА", lettuce: "САЛАТ", pickle: "ОГУРЕЦ",
+  flour: "МУКА", sugar: "САХАР", egg: "ЯЙЦО", milk: "МОЛОКО", cream: "КРЕМ", candles: "СВЕЧКИ",
+  strawberry: "КЛУБНИКА", blueberry: "ЧЕРНИКА", sprinkles: "ПОСЫПКА", chocolate: "ШОКОЛАД",
+  honey: "МЁД", jam: "ВАРЕНЬЕ", sourcream: "СМЕТАНА", banana: "БАНАН", kiwi: "КИВИ", orange: "АПЕЛЬСИН", straw: "ТРУБОЧКА",
+  pin: "СКАЛКА", oven: "ДУХОВКА", cutter: "НОЖ", pan: "СКОВОРОДКА", mixer: "МИКСЕР", whisk: "ВЕНЧИК", bowl: "МИСКА",
+  blender: "БЛЕНДЕР", blow: "ЗАДУЙ", eat: "КУШАЙ", glass: "ПЕЙ",
+};
+const iconSvg = id => `<svg viewBox="0 0 100 100">${ICON[id]}</svg>`;
+
+// цвета мебели для трёх вариантов оформления
+const THEMES = {
+  1: { oven: ["#E86F51", "#D45B3E", "#A8442D"], bowl: ["#8FC1E3", "#7AB0D6", "#5F95BF", "#B9DAF0"], blender: ["#5FA3CD", "#3F7FAD"] },
+  2: { oven: ["#7DCFB6", "#68BCA3", "#4E9B84"], bowl: ["#F7C948", "#E9B530", "#CF9A1A", "#FBE08A"], blender: ["#EC7AA0", "#C85C82"] },
+  3: { oven: ["#2F4B3A", "#263E30", "#1C2E24"], bowl: ["#F2A65A", "#E39147", "#C97834", "#F7C28C"], blender: ["#2F4B3A", "#1C2E24"] },
+};
+const THEME_N = (() => { const m = /[?&]theme=([123])/.exec(location.search); return m ? m[1] : "1"; })();
+const T = THEMES[THEME_N];
+document.documentElement.dataset.theme = THEME_N;
+ICON.oven = ICON.oven.replaceAll("#5BB5A2", T.oven[0]).replaceAll("#4FA391", T.oven[1]);
+ICON.bowl = ICON.bowl.replaceAll("#6FB3DD", T.bowl[0]).replaceAll("#5FA3CD", T.bowl[1]);
+ICON.blender = ICON.blender.replaceAll("#E4513A", T.blender[0]);
+
+// =====================================================================
+//  ОБЩАЯ МЕБЕЛЬ: духовка, сковородка, миска, тарелка
+// =====================================================================
+function buildOven(S) {
+  const g = G_(world, `
+    <rect x="1078" y="684" width="34" height="22" rx="6" fill="${T.oven[2]}"/><rect x="1388" y="684" width="34" height="22" rx="6" fill="${T.oven[2]}"/>
+    <rect x="1060" y="210" width="380" height="482" rx="32" fill="${T.oven[0]}"/>
+    <path d="M1060 242 a32 32 0 0 1 32 -32 h316 a32 32 0 0 1 32 32 v76 h-380z" fill="${T.oven[1]}"/>
+    <circle cx="1122" cy="266" r="22" fill="#F7F3EC"/><rect x="1118" y="248" width="8" height="18" rx="4" fill="${T.oven[1]}"/>
+    <circle cx="1186" cy="266" r="22" fill="#F7F3EC"/><rect x="1182" y="248" width="8" height="18" rx="4" fill="${T.oven[1]}" transform="rotate(60 1186 266)"/>
+    <circle cx="1372" cy="266" r="34" fill="#F7F3EC"/>
+    <rect x="1150" y="342" width="200" height="22" rx="11" fill="#F7F3EC"/>
+    <rect x="1094" y="380" width="312" height="268" rx="24" fill="#2F2A28"/>`);
+  S.ovTimer = S_("circle", { cx: 1372, cy: 266, r: 24, fill: "none", stroke: "#E4513A", "stroke-width": 10, "stroke-dasharray": "150.8", "stroke-dashoffset": "150.8", transform: "rotate(-90 1372 266)", "stroke-linecap": "round" }, g);
+  S.ovGlow = S_("rect", { x: 1110, y: 396, width: 280, height: 236, rx: 16, fill: "#FF9B3D", opacity: 0 }, g);
+  S.ovHeat = S_("path", { d: "M1132 612 h236", stroke: "#5A4A44", "stroke-width": 8, "stroke-linecap": "round" }, g);
+  S.ovInside = S_("g", {}, g);
+  G_(g, `<path d="M1124 404 L1180 404 L1124 470Z" fill="#fff" opacity=".12"/><path d="M1200 404 L1222 404 L1124 520 L1124 494Z" fill="#fff" opacity=".1"/>`);
+  S.targets.oven = g;
+  return g;
+}
+// печём: блюдо улетает в духовку, там горит свет, тикает таймер, «дзинь» — и выезжает обратно
+async function bake(S, dish, insideHtml, onBaked, back = dish, ms = 4200) {
+  const gen = G.gen;
+  const b = dish.getBBox(), cx = b.x + b.width / 2, cy = b.y + b.height / 2;
+  const k = Math.min(.9, 250 / b.width);
+  dish.classList.add("fb");
+  SFX.whoosh();
+  // без fill: "forwards" — после анимации блюдо прячем явно, а потом явно показываем
+  await dish.animate([{ transform: "none", opacity: 1 }, { transform: `translate(${1250 - cx}px,${514 - cy}px) scale(${k})`, opacity: 0 }], { duration: 650, easing: "ease-in" }).finished;
+  dish.style.visibility = "hidden";
+  if (gen !== G.gen) return;
+  S.ovInside.innerHTML = insideHtml;
+  S.ovInside.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300 });
+  S.ovHeat.setAttribute("stroke", "#FF5A2E");
+  S.ovGlow.classList.add("pulse");
+  tween(400, t => S.ovGlow.setAttribute("opacity", .8 * t));
+  say("oven_wait");
+  const ticker = setInterval(() => SFX.tick(), 500);
+  await tween(ms, t => S.ovTimer.setAttribute("stroke-dashoffset", (150.8 * (1 - t)).toFixed(1)), t => t);
+  clearInterval(ticker);
+  if (gen !== G.gen) return;
+  SFX.ding(); say("oven_ding");
+  S.ovHeat.setAttribute("stroke", "#5A4A44");
+  S.ovGlow.classList.remove("pulse");
+  tween(400, t => S.ovGlow.setAttribute("opacity", .8 * (1 - t)));
+  S.ovInside.innerHTML = "";
+  onBaked && onBaked();
+  if (back !== dish) dish.style.display = "none";
+  back.style.display = "";
+  back.style.visibility = "";
+  back.style.opacity = "";
+  const bb = back.getBBox(), bx = bb.x + bb.width / 2, by = bb.y + bb.height / 2;
+  back.classList.add("fb");
+  await back.animate([{ transform: `translate(${1250 - bx}px,${514 - by}px) scale(${Math.min(.9, 250 / bb.width)})`, opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 650, easing: "ease-out" }).finished;
+  back.style.visibility = "";
+  S.ovTimer.setAttribute("stroke-dashoffset", "150.8");
+}
+
+function buildPan(S, cx, cy, k = 1) {
+  const wrap = S_("g", {}, world);
+  const g = G_(wrap, `
+    <rect x="150" y="-10" width="50" height="20" fill="#2C2C31"/>
+    <rect x="186" y="-17" width="170" height="34" rx="17" fill="#6B4A33"/>
+    <ellipse cy="12" rx="196" ry="74" fill="#2C2C31"/>
+    <ellipse rx="196" ry="70" fill="#3A3A40"/>
+    <ellipse cy="4" rx="168" ry="56" fill="#55565C"/>`, { transform: `translate(${cx} ${cy}) scale(${k})` });
+  S.panIn = S_("g", {}, g);
+  S.steam = S_("g", { transform: "translate(0 -40)" }, g);
+  S.targets.pan = wrap;
+  S.panXY = [cx, cy];
+  return wrap;
+}
+function steamOn(S) {
+  S.steam.innerHTML = [-70, 0, 70].map((x, i) => `<circle class="steam" style="animation-delay:${i * .7}s" cx="${x}" cy="0" r="26" fill="#FFFFFF" opacity="0"/>`).join("");
+}
+function steamOff(S) { S.steam.innerHTML = ""; }
+// перевернуть то, что лежит на сковородке
+async function flip(el) {
+  SFX.flip();
+  el.classList.add("fb");
+  await el.animate([
+    { transform: "translateY(0) scaleY(1)" },
+    { transform: "translateY(-190px) scaleY(-1)", offset: .5 },
+    { transform: "translateY(0) scaleY(1)" }
+  ], { duration: 750, easing: "ease-in-out" }).finished;
+  SFX.drop();
+}
+// перелететь из одного места в другое (в координатах кухни)
+async function flyTo(el, tx, ty, sx = 1, sy = sx, ms = 650) {
+  const b = el.getBBox();
+  const cx = b.x + b.width / 2, cy = b.y + b.height / 2;
+  // учитываем сдвиг внешней группы
+  const m = el.parentNode.getCTM ? el.parentNode.getCTM() : null;
+  const wx = m ? m.a * cx + m.e : cx, wy = m ? m.d * cy + m.f : cy;
+  el.classList.add("fb");
+  SFX.whoosh();
+  await el.animate([
+    { transform: "none" },
+    { transform: `translate(${(tx - wx) / (m ? m.a : 1)}px,${(ty - wy - 120) / (m ? m.d : 1)}px) scale(${(sx + 1) / 2},${(sy + 1) / 2})`, offset: .5 },
+    { transform: `translate(${(tx - wx) / (m ? m.a : 1)}px,${(ty - wy) / (m ? m.d : 1)}px) scale(${sx},${sy})` }
+  ], { duration: ms, easing: "ease-in-out", fill: "forwards" }).finished;
+}
+
+// миска (вид чуть сверху), внутри — то, что насыпали
+function buildBowl(S, cx, cy, k, tool) {
+  const wrap = S_("g", {}, world);
+  const g = S_("g", { transform: `translate(${cx} ${cy}) scale(${k})` }, wrap);
+  G_(g, `
+    <path d="M-218 0 Q-208 178 0 178 Q208 178 218 0 Z" fill="${T.bowl[0]}"/>
+    <path d="M-176 50 Q-150 132 -64 152" stroke="${T.bowl[3]}" stroke-width="16" fill="none" stroke-linecap="round"/>
+    <ellipse rx="218" ry="56" fill="${T.bowl[1]}"/>
+    <ellipse rx="198" ry="45" fill="${T.bowl[2]}"/>
+    <clipPath id="bowlClip"><ellipse rx="198" ry="45"/></clipPath>`);
+  S.bowlIn = S_("g", { "clip-path": "url(#bowlClip)" }, g);
+  S.toolWrap = S_("g", {}, g);
+  S.toolWrap.style.display = "none";
+  S.toolWrap.innerHTML = tool === "spoons" ? `
+    <g transform="rotate(-18)"><rect x="-70" y="-290" width="22" height="260" rx="11" fill="#C9792A"/><ellipse cx="-59" cy="-30" rx="40" ry="26" fill="#D99A4E"/></g>
+    <g transform="rotate(18)"><rect x="48" y="-290" width="22" height="260" rx="11" fill="#C9792A"/><ellipse cx="59" cy="-30" rx="40" ry="26" fill="#D99A4E"/></g>` : tool === "mixer" ? `
+    <rect x="-34" y="-150" width="10" height="150" rx="5" fill="#C9CDD2"/><rect x="24" y="-150" width="10" height="150" rx="5" fill="#C9CDD2"/>
+    <ellipse cx="-29" cy="-4" rx="20" ry="9" fill="none" stroke="#C9CDD2" stroke-width="6"/><ellipse cx="29" cy="-4" rx="20" ry="9" fill="none" stroke="#C9CDD2" stroke-width="6"/>
+    <path d="M-120 -250 h200 a44 44 0 0 1 44 44 v0 a44 44 0 0 1 -44 44 h-200 a44 44 0 0 1 -44 -44 v0 a44 44 0 0 1 44 -44z" fill="#F27C6B"/>
+    <path d="M-70 -250 Q0 -330 90 -250" stroke="#E4513A" stroke-width="26" fill="none" stroke-linecap="round"/>
+    <circle cx="-110" cy="-206" r="14" fill="#FFF8EF"/>
+    <rect x="-60" y="-216" width="120" height="16" rx="8" fill="#E4513A"/>` : `
+    <rect x="-12" y="-300" width="24" height="120" rx="12" fill="#C9792A"/>
+    <path d="M-8 -184 C-90 -110 -60 10 0 10 C60 10 90 -110 8 -184" stroke="#C9CDD2" stroke-width="8" fill="none"/>
+    <path d="M-4 -184 C-46 -110 -30 8 0 8 C30 8 46 -110 4 -184" stroke="#C9CDD2" stroke-width="8" fill="none"/>`;
+  S.bowl = wrap; S.bowlK = k; S.bowlXY = [cx, cy];
+  S.targets.bowl = wrap;
+  return wrap;
+}
+// что насыпаем в миску
+const BOWL = {
+  flour: `<ellipse cx="-30" cy="10" rx="120" ry="30" fill="#FFFBF2"/><ellipse cx="-50" cy="0" rx="50" ry="12" fill="#FFFFFF"/>`,
+  sugar: ring(70, 4, 26, 9, (x, y) => `<rect x="${(x - 9).toFixed(0)}" y="${(y * .5 - 6).toFixed(0)}" width="18" height="14" rx="3" fill="#FFFFFF" stroke="#D9CFC0" stroke-width="2"/>`) + `<rect x="61" y="-4" width="18" height="14" rx="3" fill="#FFFFFF" stroke="#D9CFC0" stroke-width="2"/>`,
+  egg1: `<ellipse cx="-60" cy="-10" rx="48" ry="17" fill="#FFFDF5"/><ellipse cx="-60" cy="-12" rx="20" ry="11" fill="#F7B733"/>`,
+  egg2: `<ellipse cx="50" cy="14" rx="48" ry="17" fill="#FFFDF5"/><ellipse cx="50" cy="12" rx="20" ry="11" fill="#F7B733"/>`,
+};
+function fillBowl(S, key) {
+  const g = G_(S.bowlIn, BOWL[key]);
+  popIn(g);
+  return g;
+}
+function bowlMilk(S) {
+  const m = S_("ellipse", { rx: 198, ry: 45, fill: "#FBF7EE", opacity: 0 }, S.bowlIn);
+  SFX.pour();
+  return tween(900, t => m.setAttribute("opacity", (.85 * t).toFixed(2)));
+}
+function bowlBatterLayer(S, color) {
+  S.batter = S_("ellipse", { rx: 198, ry: 45, fill: color, opacity: 0 }, S.bowlIn);
+  const sw = S_("g", { transform: "scale(1 .23)" }, S.bowlIn);
+  S.swirl = G_(sw, `<path d="${spiral(170, 3)}" stroke="${lighten(color, .45)}" stroke-width="16" fill="none" stroke-linecap="round"/>`);
+  S.swirl.setAttribute("opacity", 0);
+}
+
+// следы укусов: маска, в которую добавляем чёрные кружки
+function setupBites(S) {
+  const defs = S_("defs", {}, world);
+  const m = S_("mask", { id: "biteMask", maskUnits: "userSpaceOnUse", x: 0, y: 0, width: 1600, height: 1000 }, defs);
+  S_("rect", { width: 1600, height: 1000, fill: "#fff" }, m);
+  S.bites = S_("g", {}, m);
+}
+function bite(S, x, y) {
+  const r = 64;
+  S_("circle", { cx: x, cy: y, r, fill: "#000" }, S.bites);
+  for (let i = 0; i < 6; i++) {
+    const a = Math.PI * 2 * i / 6 + rnd(0, .4);
+    S_("circle", { cx: x + r * Math.cos(a), cy: y + r * Math.sin(a), r: 18, fill: "#000" }, S.bites);
+  }
+}
+
+// =====================================================================
+//  РЕЦЕПТЫ
+//  Шаги: drag — перетащить продукт; tap — нажать N раз; mix — нажать и держать;
+//  auto — само; pick — класть что хочешь, потом галочка; eat / drink — кушать.
+// =====================================================================
+const RECIPES = {};
+
+// ---------------------------- ПИЦЦА ----------------------------
+RECIPES.pizza = {
+  title: "Пицца",
+  shelf: ["dough", "sauce", "cheese", "salami", "tomato", "mushroom"],
+  build(S) {
+    S.board = G_(world, `
+      <rect x="860" y="548" width="150" height="44" rx="22" fill="#B87A40"/>
+      <circle cx="986" cy="570" r="10" fill="#8E5A2C"/>
+      <ellipse cx="600" cy="584" rx="300" ry="190" fill="#B87A40"/>
+      <ellipse cx="600" cy="572" rx="300" ry="188" fill="#D29A5C"/>`);
+    S.targets.board = S.board;
+    S.dish = S_("g", {}, world);
+    S.pz = S_("g", { transform: "translate(600 570) scale(1 .6)" }, S.dish);
+    S.crust = S_("circle", { r: 0, fill: "#E6B772" }, S.pz);
+    S.doughC = S_("circle", { r: 0, fill: "#F6DCAE" }, S.pz);
+    S.sauce = S_("circle", { r: 0, fill: "#D9432E" }, S.pz);
+    S.cheese = S_("g", {}, S.pz);
+    S.tops = S_("g", {}, S.pz);
+    S.cuts = S_("g", {}, S.pz);
+    S.R = 90;
+    S.targets.dish = S.dish;
+    buildOven(S);
+  },
+  steps: [
+    { kind: "drag", item: "dough", target: "board", say: "pz_intro",
+      run: S => { SFX.drop(); return tween(450, t => { S.crust.setAttribute("r", 90 * t); S.doughC.setAttribute("r", 76 * t); }, backOut); } },
+    { kind: "tap", target: "board", times: 4, say: "pz_roll", hint: "pin",
+      enter(S) {
+        S.pin = place(world, 600, 570, `
+          <rect x="-340" y="-15" width="80" height="30" rx="15" fill="#A86C38"/><rect x="260" y="-15" width="80" height="30" rx="15" fill="#A86C38"/>
+          <rect x="-270" y="-26" width="540" height="52" rx="26" fill="#E2B27A"/><rect x="-250" y="-18" width="500" height="10" rx="5" fill="#F0CB9A"/>`);
+        popIn(S.pin);
+      },
+      onTap(S, i) {
+        SFX.roll();
+        S.pin.getAnimations().forEach(a => a.cancel());
+        S.pin.animate([{ transform: "translateY(0)" }, { transform: "translateY(-80px)" }, { transform: "translateY(80px)" }, { transform: "translateY(0)" }], { duration: 600, easing: "ease-in-out" });
+        const r0 = S.R, r1 = 90 + (i + 1) * 40; S.R = r1;
+        tween(600, t => { const r = r0 + (r1 - r0) * t; S.crust.setAttribute("r", r); S.doughC.setAttribute("r", r - 22 * (r / 250)); });
+      },
+      run: async S => { await sleep(500); await fadeOut(S.pin, 300); S.pin.parentNode.remove(); } },
+    { kind: "drag", item: "sauce", target: "board", say: "pz_sauce",
+      run: S => { SFX.squirt(); return tween(900, t => S.sauce.setAttribute("r", 212 * t)); } },
+    { kind: "drag", item: "cheese", target: "board", say: "pz_cheese",
+      run: async S => {
+        S.shreds = [];
+        for (let i = 0; i < 110; i++) {
+          const a = rnd(0, Math.PI * 2), r = 205 * Math.sqrt(Math.random());
+          const e = S_("rect", { x: -14, y: -5, width: 28, height: 10, rx: 5, fill: pick(["#F8D35A", "#FCE38A", "#F5C842"]),
+            transform: `translate(${(r * Math.cos(a)).toFixed(0)} ${(r * Math.sin(a)).toFixed(0)}) rotate(${rnd(0, 180).toFixed(0)})`, opacity: 0 }, S.cheese);
+          S.shreds.push(e);
+        }
+        for (let b = 0; b < 6; b++) {
+          SFX.sprinkle();
+          S.shreds.slice(b * 19, b * 19 + 19).forEach(e => e.setAttribute("opacity", 1));
+          await sleep(120);
+        }
+      } },
+    { kind: "drag", item: "salami", target: "board", say: "pz_salami",
+      run: async S => {
+        const spots = [[-120, -95], [45, -140], [150, -40], [100, 105], [-45, 125], [-165, 45], [10, 0]];
+        for (const [x, y] of spots) {
+          const g = place(S.tops, x, y, `<circle r="38" fill="#A82A24"/><circle r="32" fill="#D0423A"/>` + [[-12, -12], [10, -14], [16, 6], [-6, 12], [-16, 4], [4, 0]].map(([a, b]) => `<circle cx="${a}" cy="${b}" r="3.6" fill="#F5B8A8"/>`).join(""));
+          popIn(g); SFX.pop(); await sleep(110);
+        }
+      } },
+    { kind: "drag", item: "tomato", target: "board", say: "pz_tomato",
+      run: async S => {
+        const spots = [[-55, -170], [140, -125], [190, 60], [-5, 180], [-195, -40], [-70, 40]];
+        for (const [x, y] of spots) {
+          const g = place(S.tops, x, y, `<circle r="30" fill="#E2402F"/><circle r="23" fill="#F0705A"/>` + ring(0, 0, 11, 3, (a, b) => `<ellipse cx="${a.toFixed(1)}" cy="${b.toFixed(1)}" rx="5" ry="3.5" fill="#FBD7A0"/>`, .5));
+          popIn(g); SFX.pop(); await sleep(110);
+        }
+      } },
+    { kind: "drag", item: "mushroom", target: "board", say: "pz_mush",
+      run: async S => {
+        const spots = [[-20, -75], [110, 30], [-140, 130], [80, 175], [-190, -120], [60, -195], [195, -110]];
+        for (const [x, y] of spots) {
+          const g = place(S.tops, x, y, `<path d="M-32 6 Q-34 -28 0 -30 Q34 -28 32 6 Q16 6 12 4 L12 24 Q0 30 -12 24 L-12 4 Q-16 6 -32 6Z" fill="#EBD6B5" stroke="#A97B52" stroke-width="4"/>`, rnd(-40, 40));
+          popIn(g); SFX.pop(); await sleep(110);
+        }
+      } },
+    { kind: "tap", target: "oven", times: 1, say: "pz_oven",
+      run: S => bake(S, S.dish,
+        `<ellipse cx="1250" cy="560" rx="110" ry="40" fill="#E6B772"/><ellipse cx="1250" cy="558" rx="94" ry="33" fill="#D9432E"/><ellipse cx="1250" cy="556" rx="84" ry="28" fill="#F6C343" opacity=".8"/>`,
+        () => {
+          S.crust.setAttribute("fill", "#D48E45");
+          S.doughC.setAttribute("fill", "#EDBE78");
+          S.sauce.setAttribute("fill", "#C93A27");
+          S.shreds.forEach(e => { e.setAttribute("width", 42); e.setAttribute("height", 20); e.setAttribute("x", -21); e.setAttribute("y", -10); e.setAttribute("rx", 10); e.setAttribute("fill", pick(["#F6C343", "#F4B83A", "#F8D05A"])); });
+          for (let i = 0; i < 14; i++) { const a = rnd(0, 6.28), r = rnd(30, 190); S_("circle", { cx: r * Math.cos(a), cy: r * Math.sin(a), r: rnd(6, 11), fill: "#E09B35", opacity: .8 }, S.cheese); }
+        }) },
+    { kind: "tap", target: "board", times: 4, say: "pz_cut", hint: "cutter",
+      enter(S) { S.dish.style.visibility = ""; S.dish.style.opacity = ""; },
+      onTap(S, i) {
+        SFX.chop();
+        const a = i * Math.PI / 4, x = 252 * Math.cos(a), y = 252 * Math.sin(a);
+        const l = S_("line", { x1: -x, y1: -y, x2: x, y2: y, stroke: "#8E5428", "stroke-width": 7, "stroke-linecap": "round", opacity: .6, "vector-effect": "non-scaling-stroke", "stroke-dasharray": 520, "stroke-dashoffset": 520 }, S.cuts);
+        tween(300, t => l.setAttribute("stroke-dashoffset", 520 * (1 - t)));
+      } },
+    { kind: "eat", target: "dish", bites: 8 },
+  ],
+};
+
+// ---------------------------- БУРГЕР ----------------------------
+const LAYER = {
+  bunB: { h: 58, html: `<path d="M-190 -48 H190 V-28 Q190 0 160 0 H-160 Q-190 0 -190 -28 Z" fill="#DE9248"/><rect x="-192" y="-62" width="384" height="24" rx="12" fill="#F7D59A"/>` },
+  lettuce: { h: 20, html: (() => { let d = "M-210 -24 H210 "; for (let x = 210; x > -210; x -= 42) d += `Q${x - 21} 22 ${x - 42} -2 `; return `<path d="${d}Z" fill="#7CC04E"/><path d="M-186 -14 H186" stroke="#9BD46A" stroke-width="6" stroke-linecap="round"/>`; })() },
+  patty: { h: 46, html: `<rect x="-188" y="-50" width="376" height="50" rx="25" fill="#6E3D22"/><rect x="-170" y="-44" width="340" height="12" rx="6" fill="#8A5230"/>` + [-120, -40, 50, 130].map(x => `<circle cx="${x}" cy="-18" r="5" fill="#5A3019"/>`).join("") },
+  cheese: { h: 12, html: `<path d="M-198 -14 H198 V0 H152 L134 30 L116 0 H22 L4 34 L-14 0 H-108 L-126 26 L-144 0 H-198Z" fill="#F7C33A" stroke="#F7C33A" stroke-width="4" stroke-linejoin="round"/>` },
+  tomato: { h: 20, html: `<rect x="-184" y="-24" width="178" height="24" rx="12" fill="#E3412F"/><rect x="6" y="-24" width="178" height="24" rx="12" fill="#E3412F"/>` + [-150, -95, -40, 40, 95, 150].map(x => `<ellipse cx="${x}" cy="-12" rx="10" ry="5" fill="#F47A5E"/>`).join("") },
+  pickle: { h: 12, html: [-138, -46, 46, 138].map(x => `<ellipse cx="${x}" cy="-8" rx="44" ry="10" fill="#9CCB5E" stroke="#5E9B3A" stroke-width="4"/>`).join("") },
+  ketchup: { h: 4, html: `<path d="M-160 -6 Q-130 -28 -100 -6 T-40 -6 T20 -6 T80 -6 T140 -6" stroke="#C8231C" stroke-width="14" fill="none" stroke-linecap="round"/>` },
+  bunT: { h: 0, html: `<path d="M-198 0 Q-202 -146 0 -148 Q202 -146 198 0 Z" fill="#E39A4F"/><rect x="-198" y="-18" width="396" height="20" rx="10" fill="#D8873E"/><path d="M-130 -92 Q-80 -128 -10 -132" stroke="#F2B878" stroke-width="18" fill="none" stroke-linecap="round"/>` +
+    [[-110, -70, -20], [-40, -110, 10], [30, -120, -15], [100, -96, 25], [140, -50, -10], [-150, -36, 30], [-60, -60, 0], [20, -76, 35], [80, -40, -25], [-10, -30, 10]].map(([x, y, r]) => `<ellipse cx="${x}" cy="${y}" rx="9" ry="5" fill="#FFF3D6" transform="rotate(${r} ${x} ${y})"/>`).join("") },
+};
+function addLayer(S, kind, animate = true) {
+  const L = LAYER[kind];
+  const g = place(S.stack, 600, S.cy, L.html);
+  S.cy -= L.h;
+  if (animate) { SFX.drop(); return dropIn(g); }
+  return Promise.resolve();
+}
+RECIPES.burger = {
+  title: "Бургер",
+  shelf: ["bunB", "lettuce", "patty", "cheese", "tomato", "pickle", "ketchup", "bunT"],
+  build(S) {
+    S.area = S_("g", {}, world);
+    G_(S.area, `<ellipse cx="600" cy="712" rx="300" ry="68" fill="#E7DCCB"/><ellipse cx="600" cy="702" rx="300" ry="66" fill="#F7F3EC"/><ellipse cx="600" cy="702" rx="226" ry="46" fill="#EDE5D8"/>`);
+    S.stack = S_("g", {}, S.area);
+    S.cy = 698;
+    S.targets.burger = S.area;
+    S.targets.dish = S.stack;
+    buildPan(S, 1210, 640);
+  },
+  steps: [
+    { kind: "drag", item: "bunB", target: "burger", say: "bg_intro", run: S => addLayer(S, "bunB") },
+    { kind: "drag", item: "lettuce", target: "burger", say: "bg_lettuce", run: S => addLayer(S, "lettuce") },
+    { kind: "drag", item: "patty", target: "pan", say: "bg_patty",
+      run: async S => {
+        S.pp = place(S.panIn, 0, 0, `<ellipse cx="0" cy="6" rx="122" ry="42" fill="#B8505A"/><ellipse rx="120" ry="38" fill="#D96A74"/>`);
+        S.ppCook = S_("ellipse", { rx: 120, ry: 38, fill: "#6E3D22", opacity: 0 }, S.pp);
+        SFX.drop(); await dropIn(S.pp, -160);
+        S.sizzle = loopSizzle(); steamOn(S);
+      } },
+    { kind: "auto", run: async S => { await say("fry"); await tween(1200, t => S.ppCook.setAttribute("opacity", (.35 * t).toFixed(2))); } },
+    { kind: "tap", target: "pan", times: 1, say: "bg_flip",
+      run: async S => { const f = flip(S.pp); await sleep(375); S.ppCook.setAttribute("opacity", .7); await f; await tween(1200, t => S.ppCook.setAttribute("opacity", (.7 + .3 * t).toFixed(2))); } },
+    { kind: "tap", target: "pan", times: 1, say: "bg_patty_go",
+      run: async S => {
+        S.sizzle && S.sizzle(); steamOff(S);
+        await flyTo(S.pp, 600, S.cy - 25, 1.55, 1.2);
+        S.pp.parentNode.remove();
+        addLayer(S, "patty", false); SFX.drop();
+      } },
+    { kind: "drag", item: "cheese", target: "burger", say: "bg_cheese", run: S => addLayer(S, "cheese") },
+    { kind: "drag", item: "tomato", target: "burger", say: "bg_tomato", run: S => addLayer(S, "tomato") },
+    { kind: "drag", item: "pickle", target: "burger", say: "bg_pickle", run: S => addLayer(S, "pickle") },
+    { kind: "drag", item: "ketchup", target: "burger", say: "bg_ketchup", run: S => { SFX.squirt(); const g = place(S.stack, 600, S.cy, LAYER.ketchup.html); S.cy -= 4; const p = g.querySelector("path"); p.setAttribute("stroke-dasharray", 420); return tween(700, t => p.setAttribute("stroke-dashoffset", 420 * (1 - t))); } },
+    { kind: "drag", item: "bunT", target: "burger", say: "bg_top", run: S => addLayer(S, "bunT") },
+    { kind: "eat", target: "dish", bites: 8 },
+  ],
+};
+
+// ---------------------------- ТОРТИК ----------------------------
+RECIPES.cake = {
+  title: "Тортик",
+  shelf: ["flour", "sugar", "egg", "milk", "cream", "candles"],
+  build(S) {
+    buildBowl(S, 600, 560, 1, "mixer");
+    S.tin = S_("g", {}, world);
+    S.tin.style.display = "none";
+    G_(S.tin, `<ellipse cx="600" cy="676" rx="212" ry="48" fill="#97A2AC"/><rect x="388" y="566" width="424" height="110" fill="#AEB8C1"/><ellipse cx="600" cy="566" rx="212" ry="48" fill="#D3DAE0"/><ellipse cx="600" cy="566" rx="196" ry="41" fill="#7D8892"/>`);
+    S.tinBatter = S_("ellipse", { cx: 600, cy: 566, rx: 196, ry: 41, fill: "#F4D58A", opacity: 0 }, S.tin);
+    S.stand = G_(world, `<rect x="560" y="700" width="80" height="40" fill="#D8CDBB"/><ellipse cx="600" cy="742" rx="120" ry="22" fill="#D8CDBB"/><ellipse cx="600" cy="698" rx="276" ry="60" fill="#DDD2C0"/><ellipse cx="600" cy="688" rx="276" ry="58" fill="#F7F3EC"/>`);
+    S.stand.style.display = "none";
+    S.cake = S_("g", {}, world);
+    S.cake.style.display = "none";
+    G_(S.cake, `<ellipse cx="600" cy="640" rx="220" ry="56" fill="#D9954A"/><rect x="380" y="470" width="440" height="170" fill="#E5A85A"/>
+      <path d="M380 548 Q600 606 820 548 v18 Q600 624 380 566z" fill="#FBE3EA"/>
+      <ellipse cx="600" cy="470" rx="220" ry="56" fill="#F0C27A"/>`);
+    S.creamG = S_("g", {}, S.cake);
+    S.decor = S_("g", {}, S.cake);
+    S.candles = S_("g", {}, S.cake);
+    S.targets.cake = S.cake;
+    S.targets.dish = S.cake;
+    buildOven(S);
+  },
+  steps: [
+    { kind: "drag", item: "flour", target: "bowl", say: "ck_intro", run: S => { SFX.puff(); fillBowl(S, "flour"); return sleep(400); } },
+    { kind: "drag", item: "sugar", target: "bowl", say: "ck_sugar", run: S => { SFX.sprinkle(); fillBowl(S, "sugar"); return sleep(400); } },
+    { kind: "drag", item: "egg", target: "bowl", say: "ck_eggs", run: async S => { SFX.crack(); fillBowl(S, "egg1"); await sleep(400); SFX.crack(); fillBowl(S, "egg2"); await sleep(300); } },
+    { kind: "drag", item: "milk", target: "bowl", say: "ck_milk", run: S => bowlMilk(S) },
+    { kind: "mix", target: "bowl", say: "ck_mix", ms: 2600, motor: 95, hint: "mixer", shake: "toolWrap",
+      enter(S) { bowlBatterLayer(S, "#F4D58A"); S.toolWrap.style.display = ""; popIn(S.toolWrap); },
+      progress(S, p) { S.batter.setAttribute("opacity", p.toFixed(2)); S.swirl.setAttribute("opacity", Math.min(1, p * 3).toFixed(2)); },
+      run: async S => { await fadeOut(S.toolWrap, 300); S.toolWrap.style.display = "none"; } },
+    { kind: "tap", target: "bowl", times: 1, say: "ck_pour",
+      run: async S => {
+        S.bowl.classList.add("fb");
+        await S.bowl.animate([{ transform: "none" }, { transform: "translate(-40px,-250px) rotate(28deg) scale(.8)" }], { duration: 600, easing: "ease-in-out", fill: "forwards" }).finished;
+        S.tin.style.display = ""; popIn(S.tin);
+        const st = S_("rect", { x: 686, y: 440, width: 28, height: 0, rx: 14, fill: "#F4D58A" }, world);
+        SFX.pour();
+        await tween(400, t => st.setAttribute("height", 150 * t));
+        await tween(900, t => S.tinBatter.setAttribute("opacity", t.toFixed(2)), t => t);
+        await tween(250, t => { st.setAttribute("y", 440 + 150 * t); st.setAttribute("height", 150 * (1 - t)); });
+        st.remove();
+        await S.bowl.animate([{ transform: "translate(-40px,-250px) rotate(28deg) scale(.8)", opacity: 1 }, { transform: "translate(-700px,-300px) rotate(0) scale(.5)", opacity: 0 }], { duration: 500, easing: "ease-in", fill: "forwards" }).finished;
+        S.bowl.style.display = "none";
+      } },
+    { kind: "tap", target: "oven", times: 1, say: "ck_oven",
+      run: async S => {
+        S.stand.style.display = "";
+        popIn(S.stand);
+        await bake(S, S.tin, `<rect x="1170" y="540" width="160" height="50" fill="#AEB8C1"/><ellipse cx="1250" cy="540" rx="80" ry="20" fill="#F0C27A"/>`, null, S.cake);
+      } },
+    { kind: "drag", item: "cream", target: "cake", say: "ck_cream",
+      run: async S => {
+        SFX.squirt();
+        const drips = [-180, -110, -40, 40, 115, 185].map(x => { const y = 466 + 58 * Math.sqrt(1 - (x / 224) ** 2); return `<rect x="${600 + x - 15}" y="${(y - 12).toFixed(0)}" width="30" height="${(26 + Math.abs(x) % 30).toFixed(0)}" rx="15" fill="#F8C4D2"/>`; }).join("");
+        const g = G_(S.creamG, `<ellipse cx="600" cy="466" rx="224" ry="58" fill="#F8C4D2"/>${drips}<ellipse cx="560" cy="452" rx="110" ry="22" fill="#FBD8E1"/>`);
+        popIn(g, 0, 500); await sleep(500);
+      } },
+    { kind: "pick", items: ["strawberry", "blueberry", "sprinkles", "chocolate"], target: "cake", say: "ck_decor", min: 3, max: 16,
+      place(S, id, pt) {
+        let x = pt ? pt.x : rnd(440, 760), y = pt ? pt.y : rnd(430, 500);
+        const rx = 175, ry = 40, cx = 600, cy = 466;
+        const d = ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2;
+        if (d > 1) { const k = 1 / Math.sqrt(d); x = cx + (x - cx) * k; y = cy + (y - cy) * k; }
+        const html = {
+          strawberry: `<g transform="translate(-50 -78) scale(.55)">${ICON.strawberry}</g>`,
+          blueberry: `<circle cx="-12" cy="-8" r="13" fill="#4B55A8"/><circle cx="12" cy="-8" r="13" fill="#4B55A8"/><circle cx="0" cy="-24" r="13" fill="#4B55A8"/><circle cx="-4" cy="-28" r="4" fill="#7480CE"/>`,
+          sprinkles: ring(0, 0, 0, 10, (a, b, c, i) => { const x0 = rnd(-55, 55), y0 = rnd(-16, 16); return `<rect x="${(x0 - 7).toFixed(0)}" y="${(y0 - 3).toFixed(0)}" width="14" height="6" rx="3" fill="${["#E4513A", "#3E9B4F", "#4A90D9", "#F6B92B", "#9C5BD0"][i % 5]}" transform="rotate(${rnd(0, 180).toFixed(0)} ${x0.toFixed(0)} ${y0.toFixed(0)})"/>`; }),
+          chocolate: `<rect x="-24" y="-30" width="48" height="34" rx="5" fill="#6B3B22" transform="rotate(-15)"/><rect x="-18" y="-25" width="18" height="12" rx="2" fill="#855033" transform="rotate(-15)"/>`,
+        }[id];
+        const g = place(S.decor, x.toFixed(0), y.toFixed(0), html);
+        popIn(g);
+        id === "sprinkles" ? SFX.sprinkle() : SFX.pop();
+      } },
+    { kind: "drag", item: "candles", target: "cake", say: "ck_candles",
+      run: async S => {
+        S.flames = [];
+        const col = ["#6EC1E4", "#F49CB8", "#F7CF45"];
+        for (const [i, [x, y]] of [[505, 476], [600, 450], [695, 476]].entries()) {
+          const g = place(S.candles, x, y, `<rect x="-12" y="-96" width="24" height="96" rx="6" fill="${col[i]}"/><path d="M-12 -70 L12 -78 M-12 -44 L12 -52 M-12 -18 L12 -26" stroke="#fff" stroke-width="5" opacity=".7"/><rect x="-2" y="-110" width="4" height="16" fill="#3B2414"/>`);
+          const f = G_(g, `<path d="M0 -150 c14 16 16 28 0 40 c-16 -12 -14 -24 0 -40z" fill="#FF9F1C"/><path d="M0 -132 c6 7 7 13 0 18 c-7 -5 -6 -11 0 -18z" fill="#FFE27A"/>`);
+          f.classList.add("flame");
+          S.flames.push(f);
+          popIn(g); SFX.pop(); await sleep(200);
+        }
+        SFX.sparkle();
+      } },
+    { kind: "auto", run: async S => { await say("ck_lit"); const ms = birthdaySong(); await sleep(ms + 300); } },
+    { kind: "tap", target: "cake", times: 3, say: "ck_blow",
+      onTap(S, i) {
+        const f = S.flames[i]; if (!f) return;
+        SFX.puff();
+        f.classList.remove("flame");
+        f.animate([{ opacity: 1, transform: "scale(1)" }, { opacity: 0, transform: "scale(.2)" }], { duration: 300, fill: "forwards" });
+        const smoke = place(f.parentNode, 0, -150, `<circle r="14" fill="#C9C2BA"/><circle cx="10" cy="-18" r="10" fill="#D8D2CB"/>`);
+        smoke.classList.add("fb");
+        smoke.animate([{ transform: "translateY(0) scale(.6)", opacity: .9 }, { transform: "translateY(-90px) scale(1.6)", opacity: 0 }], { duration: 1200, fill: "forwards" });
+      } },
+    { kind: "eat", target: "dish", bites: 9 },
+  ],
+};
+
+// ---------------------------- БЛИНЧИКИ ----------------------------
+function pancakeSteps() {
+  const s = [];
+  for (let n = 0; n < 3; n++) {
+    s.push({ kind: "tap", target: "bowl", times: 1, say: n ? "pc_more" : "pc_pour",
+      run: async S => {
+        S.bowl.classList.add("fb");
+        await S.bowl.animate([{ transform: "none" }, { transform: "translate(670px,-210px) rotate(32deg)" }], { duration: 600, easing: "ease-in-out", fill: "forwards" }).finished;
+        const st = S_("rect", { x: 1150, y: 420, width: 26, height: 0, rx: 13, fill: "#F5E1A6" }, world);
+        SFX.pour();
+        S.pc = place(S.panIn, 0, 0, `<ellipse rx="140" ry="46" fill="#F5E1A6"/>`);
+        S.pcTop = S_("ellipse", { rx: 140, ry: 46, fill: "#E9B45E", opacity: 0 }, S.pc);
+        S.pc.classList.add("fb");
+        const grow = S.pc.animate([{ transform: "scale(.1)" }, { transform: "scale(1)" }], { duration: 1100, easing: "ease-out", fill: "backwards" });
+        await tween(300, t => st.setAttribute("height", 200 * t));
+        await grow.finished;
+        await tween(200, t => { st.setAttribute("y", 420 + 200 * t); st.setAttribute("height", 200 * (1 - t)); });
+        st.remove();
+        S.bowl.animate([{ transform: "translate(670px,-210px) rotate(32deg)" }, { transform: "none" }], { duration: 500, easing: "ease-in-out", fill: "forwards" });
+        if (!S.sizzle) { S.sizzle = loopSizzle(); steamOn(S); }
+        await say("fry");
+        for (let i = 0; i < 7; i++) {
+          const b = place(S.pc, rnd(-100, 100), rnd(-26, 26), `<circle r="7" fill="#E6C47A"/>`);
+          popIn(b); await sleep(140);
+        }
+      } });
+    s.push({ kind: "tap", target: "pan", times: 1, say: "pc_flip",
+      run: async S => {
+        const f = flip(S.pc); await sleep(375);
+        [...S.pc.querySelectorAll("circle")].forEach(c => c.parentNode.parentNode.remove());
+        S.pcTop.setAttribute("opacity", 1);
+        G_(S.pc, [[-60, -10], [30, 14], [70, -16], [-20, 22], [-90, 12]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="16" ry="7" fill="#D19340"/>`).join(""));
+        await f; await sleep(500);
+      } });
+    s.push({ kind: "tap", target: "pan", times: 1, say: "pc_plate",
+      run: async S => {
+        const y = 690 - S.stackN * 18;
+        await flyTo(S.pc, 790, y, 1.21, 1);
+        S.pc.parentNode.remove();
+        const g = place(S.stack, 790, y, `<ellipse cy="8" rx="172" ry="46" fill="#C98A3A"/><ellipse rx="170" ry="44" fill="#E9B45E"/>` + [[-80, -6], [20, 12], [90, -10], [-30, -18]].map(([x, yy]) => `<ellipse cx="${x}" cy="${yy}" rx="18" ry="7" fill="#D19340"/>`).join(""));
+        S.stackN++; SFX.drop();
+        if (S.stackN === 3) { S.sizzle && S.sizzle(); S.sizzle = null; steamOff(S); }
+      } });
+  }
+  return s;
+}
+RECIPES.pancakes = {
+  title: "Блинчики",
+  shelf: ["flour", "egg", "milk"],
+  build(S) {
+    G_(world, `<ellipse cx="790" cy="722" rx="250" ry="62" fill="#E7DCCB"/><ellipse cx="790" cy="712" rx="250" ry="60" fill="#F7F3EC"/><ellipse cx="790" cy="712" rx="186" ry="42" fill="#EDE5D8"/>`);
+    S.stack = S_("g", {}, world);
+    S.tops = S_("g", {}, S.stack);
+    S.stack.insertBefore(S.tops, null);
+    S.stackN = 0;
+    buildPan(S, 1230, 640);
+    buildBowl(S, 350, 560, .68, "whisk");
+    S.targets.dish = S.stack;
+  },
+  steps: [
+    { kind: "drag", item: "flour", target: "bowl", say: "pc_intro", run: S => { SFX.puff(); fillBowl(S, "flour"); return sleep(400); } },
+    { kind: "drag", item: "egg", target: "bowl", say: "pc_egg", run: async S => { SFX.crack(); fillBowl(S, "egg2"); await sleep(400); } },
+    { kind: "drag", item: "milk", target: "bowl", say: "pc_milk", run: S => bowlMilk(S) },
+    { kind: "mix", target: "bowl", say: "pc_mix", ms: 2400, motor: 0, hint: "whisk", shake: "toolWrap",
+      enter(S) { bowlBatterLayer(S, "#F5E1A6"); S.toolWrap.style.display = ""; popIn(S.toolWrap); },
+      progress(S, p) { S.batter.setAttribute("opacity", p.toFixed(2)); S.swirl.setAttribute("opacity", Math.min(1, p * 3).toFixed(2)); },
+      run: async S => { await fadeOut(S.toolWrap, 300); S.toolWrap.style.display = "none"; } },
+    ...pancakeSteps(),
+    { kind: "pick", items: ["honey", "jam", "sourcream", "chocolate", "strawberry", "blueberry"], target: "dish", say: "pc_top", min: 1, max: 12,
+      place(S, id, pt) {
+        S.tops.parentNode.appendChild(S.tops);
+        const cy = 690 - (S.stackN - 1) * 18;
+        let x = pt ? pt.x : rnd(680, 900), y = pt ? pt.y : cy + rnd(-16, 16);
+        const d = ((x - 790) / 125) ** 2 + ((y - cy) / 28) ** 2;
+        if (d > 1) { const k = 1 / Math.sqrt(d); x = 790 + (x - 790) * k; y = cy + (y - cy) * k; }
+        const html = {
+          honey: `<path d="M-70 0 C-70 -22 -20 -26 0 -20 C30 -28 76 -18 70 2 C66 20 20 22 0 18 C-30 24 -70 18 -70 0Z" fill="#F2A93B" opacity=".92"/><ellipse cx="-20" cy="-8" rx="22" ry="5" fill="#FFD27A"/>`,
+          jam: `<path d="M-44 0 C-44 -18 -10 -20 4 -16 C30 -20 48 -10 44 4 C40 18 10 18 -2 14 C-24 18 -44 14 -44 0Z" fill="#C9283F"/><ellipse cx="-12" cy="-6" rx="14" ry="4" fill="#E8607A"/>`,
+          sourcream: `<ellipse rx="38" ry="15" fill="#FFFFFF" stroke="#E2DACD" stroke-width="3"/><ellipse cy="-10" rx="20" ry="10" fill="#FFFFFF" stroke="#E2DACD" stroke-width="3"/>`,
+          chocolate: `<path d="M-60 0 L-36 -14 L-12 4 L12 -14 L36 4 L60 -10" stroke="#5A2E18" stroke-width="9" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`,
+          strawberry: `<g transform="translate(-50 -80) scale(.55)">${ICON.strawberry}</g>`,
+          blueberry: `<circle cx="-12" cy="-6" r="13" fill="#4B55A8"/><circle cx="12" cy="-6" r="13" fill="#4B55A8"/><circle cx="0" cy="-20" r="13" fill="#4B55A8"/><circle cx="-4" cy="-24" r="4" fill="#7480CE"/>`,
+        }[id];
+        const g = place(S.tops, x.toFixed(0), y.toFixed(0), html);
+        popIn(g);
+        ["honey", "jam", "sourcream"].includes(id) ? SFX.squirt() : SFX.pop();
+      } },
+    { kind: "eat", target: "dish", bites: 8 },
+  ],
+};
+
+// ---------------------------- КОКТЕЙЛЬ ----------------------------
+const FRUIT = {
+  banana: { c: "#F3E08A", html: `<circle r="24" fill="#F7EBB0"/><circle r="20" fill="#FBF2C8"/><circle r="3" cx="-5" cy="-3" fill="#C9B26A"/><circle r="3" cx="5" cy="-3" fill="#C9B26A"/><circle r="3" cx="0" cy="5" fill="#C9B26A"/>` },
+  strawberry: { c: "#E8435A", html: `<g transform="translate(-27 -30) scale(.55)">${ICON.strawberry}</g>` },
+  blueberry: { c: "#4B4FA8", html: `<circle cx="-12" r="14" fill="#4B55A8"/><circle cx="12" r="14" fill="#4B55A8"/><circle cx="-16" cy="-4" r="4" fill="#7480CE"/>` },
+  kiwi: { c: "#8BC34A", html: `<g transform="translate(-27 -28) scale(.55)">${ICON.kiwi}</g>` },
+  orange: { c: "#FF9F1C", html: `<g transform="translate(-27 -28) scale(.55)">${ICON.orange}</g>` },
+};
+RECIPES.smoothie = {
+  title: "Коктейль",
+  shelf: ["milk", "straw"],
+  build(S) {
+    S.blender = S_("g", {}, world);
+    G_(S.blender, `
+      <path d="M688 300 h44 a22 22 0 0 1 22 22 v170 a22 22 0 0 1 -22 22 h-62" stroke="#3F4A54" stroke-width="24" fill="none"/>
+      <path d="M425 230 L695 230 L655 612 L465 612 Z" fill="#E3F2F8"/>
+      <clipPath id="jarClip"><path d="M434 238 L686 238 L648 606 L472 606 Z"/></clipPath>`);
+    const jar = S_("g", { "clip-path": "url(#jarClip)" }, S.blender);
+    S.fruitWrap = S_("g", {}, jar);
+    S.milkR = S_("rect", { x: 430, y: 606, width: 260, height: 0, fill: "#FFFDF7", opacity: .7 }, jar);
+    S.mixR = S_("rect", { x: 430, y: 300, width: 260, height: 306, fill: "#F0A0A8", opacity: 0 }, jar);
+    G_(S.blender, `
+      <path d="M452 258 L478 590" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" opacity=".55"/>
+      <path d="M486 258 L500 420" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" opacity=".45"/>
+      <rect x="410" y="204" width="300" height="34" rx="14" fill="#3F4A54"/><rect x="530" y="182" width="60" height="28" rx="9" fill="#3F4A54"/>
+      <rect x="445" y="606" width="230" height="110" rx="26" fill="${T.blender[0]}"/><rect x="428" y="698" width="264" height="28" rx="14" fill="${T.blender[1]}"/>
+      <circle cx="560" cy="660" r="28" fill="#FFF8EF"/><circle cx="560" cy="660" r="15" fill="#3E9B4F"/>`);
+    S.level = 590; S.fruits = [];
+    S.glass = S_("g", {}, world);
+    G_(S.glass, `<path d="M1080 360 L1290 360 L1264 724 L1106 724 Z" fill="#E3F2F8"/><clipPath id="glassClip"><path d="M1088 368 L1282 368 L1258 716 L1112 716 Z"/></clipPath>`);
+    const gl = S_("g", { "clip-path": "url(#glassClip)" }, S.glass);
+    S.drinkR = S_("rect", { x: 1080, y: 716, width: 220, height: 0, fill: "#F0A0A8" }, gl);
+    S.strawG = S_("g", {}, S.glass);
+    G_(S.glass, `<path d="M1104 392 L1124 690" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" opacity=".6"/><ellipse cx="1185" cy="360" rx="105" ry="10" fill="#CFE6EF"/>`);
+    S.targets.blender = S.blender;
+    S.targets.glass = S.glass;
+    S.targets.dish = S.glass;
+  },
+  steps: [
+    { kind: "pick", items: ["banana", "strawberry", "blueberry", "kiwi", "orange"], target: "blender", say: "sm_intro", min: 2, max: 6,
+      place(S, id) {
+        S.fruits.push(FRUIT[id].c);
+        const y = S.level, w = 210 - (590 - y) * .2;
+        for (let i = 0; i < 3; i++) {
+          const g = place(S.fruitWrap, (560 + (i - 1) * w / 3 + rnd(-12, 12)).toFixed(0), (y + rnd(-8, 8)).toFixed(0), FRUIT[id].html, rnd(-40, 40));
+          popIn(g, i * 90);
+        }
+        S.level -= 40;
+        SFX.drop();
+      } },
+    { kind: "drag", item: "milk", target: "blender", say: "sm_milk",
+      run: S => { SFX.pour(); const top = 300; return tween(1000, t => { const h = (606 - top) * t; S.milkR.setAttribute("y", 606 - h); S.milkR.setAttribute("height", h); }); } },
+    { kind: "mix", target: "blender", say: "sm_blend", ms: 3000, motor: 150,
+      enter(S) { S.color = juicy(hexMix(S.fruits)); S.mixR.setAttribute("fill", S.color); S.drinkR.setAttribute("fill", S.color); },
+      start(S) { S.fruitWrap.classList.add("spin"); },
+      stop(S) { S.fruitWrap.classList.remove("spin"); },
+      progress(S, p) { S.mixR.setAttribute("opacity", Math.min(1, p * 1.2).toFixed(2)); },
+      run: async S => { S.fruitWrap.style.display = "none"; S.milkR.style.display = "none"; S.mixR.setAttribute("opacity", 1); } },
+    { kind: "tap", target: "blender", times: 1, say: "sm_pour",
+      run: async S => {
+        S.blender.classList.add("fb");
+        await S.blender.animate([{ transform: "none" }, { transform: "translate(380px,-170px) rotate(42deg) scale(.85)" }], { duration: 650, easing: "ease-in-out", fill: "forwards" }).finished;
+        const st = S_("rect", { x: 1150, y: 230, width: 30, height: 0, rx: 15, fill: S.color }, world);
+        SFX.pour();
+        await tween(300, t => st.setAttribute("height", 486 * t));
+        await tween(1200, t => { const h = 300 * t; S.drinkR.setAttribute("y", 716 - h); S.drinkR.setAttribute("height", h); S.mixR.setAttribute("y", 300 + 306 * t); }, t => t);
+        await tween(200, t => { st.setAttribute("y", 230 + 486 * t); st.setAttribute("height", 486 * (1 - t)); });
+        st.remove();
+        await S.blender.animate([{ transform: "translate(380px,-170px) rotate(42deg) scale(.85)" }, { transform: "none" }], { duration: 550, easing: "ease-in-out", fill: "forwards" }).finished;
+      } },
+    { kind: "drag", item: "straw", target: "glass", say: "sm_straw",
+      run: async S => {
+        const g = G_(S.strawG, `<path d="M1200 700 L1236 290 L1300 254" stroke="#E4513A" stroke-width="22" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M1200 700 L1236 290 L1300 254" stroke="#FFF8EF" stroke-width="22" fill="none" stroke-dasharray="14 18" stroke-linejoin="round"/>`);
+        SFX.pop(); await dropIn(g, -200);
+      } },
+    { kind: "drink", target: "glass", sips: 6 },
+  ],
+};
+
+// =====================================================================
+//  НОВЫЕ БЛЮДА: суп, яичница, салат, хот-дог, печенье, мороженое
+// =====================================================================
+// плавный переход одного цвета в другой
+const lerpHex = (a, b, t) => "#" + [1, 3, 5].map(i => Math.round(parseInt(a.substr(i, 2), 16) * (1 - t) + parseInt(b.substr(i, 2), 16) * t).toString(16).padStart(2, "0")).join("");
+const COOKIE = {
+  car: `<path d="M-54 12 V-2 Q-54 -10 -46 -10 H-32 L-20 -32 H20 L34 -10 H46 Q54 -10 54 -2 V12 Z"/><circle cx="-28" cy="14" r="14"/><circle cx="28" cy="14" r="14"/>`,
+  bear: `<circle cx="-30" cy="-30" r="17"/><circle cx="30" cy="-30" r="17"/><circle r="42"/>`,
+  star: (() => { let d = ""; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 24 : 54; d += (i ? "L" : "M") + (r * Math.cos(a)).toFixed(1) + " " + (r * Math.sin(a)).toFixed(1); } return `<path d="${d}Z"/>`; })(),
+  heart: `<path d="M0 42 C-52 8 -50 -36 -24 -42 C-10 -44 0 -32 0 -24 C0 -32 10 -44 24 -42 C50 -36 52 8 0 42Z"/>`,
+};
+const cutterIcon = k => `<g transform="translate(50 52) scale(.72)" fill="#EEF1F3" stroke="#8A949C" stroke-width="8" stroke-linejoin="round">${COOKIE[k]}</g>`;
+const scoopIcon = (c, dots = "") => `<path d="M24 62 h52 l-7 30 h-38z" fill="#FFFFFF" stroke="#E2DACD" stroke-width="3"/><circle cx="50" cy="46" r="28" fill="${c}"/><path d="M22 52 Q28 66 36 58 Q42 70 50 62 Q58 70 64 58 Q72 66 78 52Z" fill="${c}"/><ellipse cx="40" cy="36" rx="8" ry="5" fill="#fff" opacity=".4"/>${dots}`;
+const SCOOP = {
+  scoop_s: { c: "#F49CB8", dots: "" },
+  scoop_c: { c: "#8B5A3C", dots: "" },
+  scoop_v: { c: "#FFF1C9", dots: "" },
+  scoop_m: { c: "#A8E6CF", dots: [[-30, -20], [20, -36], [34, 6], [-8, 14], [-40, 20], [8, -10]].map(([x, y]) => `<rect x="${x}" y="${y}" width="9" height="6" rx="2" fill="#4A2C17"/>`).join("") },
+};
+Object.assign(ICON, {
+  water: `<path d="M26 40 q-16 0 -16 16 q0 14 16 14" stroke="#8DB9E2" stroke-width="6" fill="none"/><path d="M26 28 h44 l8 -10 h8 l-8 18 v48 a8 8 0 0 1 -8 8 h-36 a8 8 0 0 1 -8 -8z" fill="#E3F2F8" stroke="#8DB9E2" stroke-width="4"/><path d="M29 52 h38 v28 a6 6 0 0 1 -6 6 h-26 a6 6 0 0 1 -6 -6z" fill="#7EC4E3"/>`,
+  chicken: `<path d="M28 66 C10 52 16 22 40 16 C66 10 84 32 74 54 C68 66 52 72 46 76 Z" fill="#E7A35A"/><path d="M34 30 Q44 22 56 24" stroke="#F4C88A" stroke-width="6" fill="none" stroke-linecap="round"/><g transform="rotate(35 50 80)"><rect x="44" y="68" width="12" height="22" rx="4" fill="#F7F0E3"/><circle cx="45" cy="92" r="6" fill="#F7F0E3"/><circle cx="55" cy="92" r="6" fill="#F7F0E3"/></g>`,
+  carrot: `<path d="M50 94 L30 36 Q50 26 70 36 Z" fill="#F28C28"/><path d="M38 50 h8 M44 64 h8 M40 76 h6" stroke="#D9731A" stroke-width="3" stroke-linecap="round"/><path d="M50 32 C44 16 36 12 30 14 M50 32 C50 14 54 8 60 8 M50 32 C58 18 68 16 74 20" stroke="#3E9B47" stroke-width="6" fill="none" stroke-linecap="round"/>`,
+  noodles: `<ellipse cx="50" cy="56" rx="38" ry="30" fill="#F7E3A1"/>` + [30, 42, 54, 66, 78].map((y, i) => `<path d="M18 ${y} q8 -8 16 0 t16 0 t16 0 t16 0" stroke="${i % 2 ? "#E8C766" : "#F2D27A"}" stroke-width="5" fill="none" stroke-linecap="round"/>`).join(""),
+  salt: `<path d="M32 36 h36 l6 52 h-48z" fill="#F7F4EE" stroke="#C9CDD2" stroke-width="3"/><path d="M32 36 q18 -28 36 0z" fill="#B9C2CA"/><circle cx="44" cy="22" r="2" fill="#8A949C"/><circle cx="50" cy="18" r="2" fill="#8A949C"/><circle cx="56" cy="22" r="2" fill="#8A949C"/><rect x="38" y="56" width="24" height="16" rx="4" fill="#4A90D9"/>`,
+  greens: `<path d="M50 92 L46 54 M50 92 L60 50 M50 92 L36 58" stroke="#3E7F2E" stroke-width="5" stroke-linecap="round"/>` + [[44, 38, 14], [62, 34, 13], [32, 48, 12], [54, 22, 11], [70, 48, 10], [40, 24, 10]].map(([x, y, r], i) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${i % 2 ? "#7CC04E" : "#5DA23B"}"/>`).join(""),
+  stove: `<rect x="8" y="30" width="84" height="56" rx="12" fill="#6F8796"/><ellipse cx="42" cy="58" rx="26" ry="15" fill="none" stroke="#9FB4C2" stroke-width="5"/><circle cx="78" cy="74" r="8" fill="#FFF8EF"/><circle cx="78" cy="74" r="4" fill="#E4513A"/>`,
+  ladle: `<path d="M68 8 L46 60" stroke="#8A949C" stroke-width="8" stroke-linecap="round"/><path d="M18 60 a28 20 0 0 0 56 0z" fill="#C9CDD2"/><ellipse cx="46" cy="60" rx="28" ry="6" fill="#B1B8BF"/>`,
+  pot: `<rect x="6" y="38" width="18" height="10" rx="5" fill="#9AA5AF"/><rect x="76" y="38" width="18" height="10" rx="5" fill="#9AA5AF"/><path d="M20 36 V76 Q20 88 32 88 H68 Q80 88 80 76 V36Z" fill="#E4513A"/><ellipse cx="50" cy="36" rx="30" ry="8" fill="#C9432F"/><ellipse cx="50" cy="36" rx="25" ry="5" fill="#F2C35A"/>`,
+  butter: `<ellipse cx="50" cy="74" rx="40" ry="12" fill="#E2DACD"/><path d="M18 52 L50 38 L84 50 L52 66Z" fill="#FFE38A"/><path d="M18 52 L52 66 V82 L18 68Z" fill="#F6CF55"/><path d="M52 66 L84 50 V66 L52 82Z" fill="#EAC042"/>`,
+  avocado: `<path d="M50 8 C72 8 80 40 82 58 C84 82 70 94 50 94 C30 94 16 82 18 58 C20 40 28 8 50 8Z" fill="#3F6B2A"/><path d="M50 16 C67 16 73 42 75 58 C77 78 66 87 50 87 C34 87 23 78 25 58 C27 42 33 16 50 16Z" fill="#C8E07A"/><circle cx="50" cy="62" r="15" fill="#8A5A2E"/><circle cx="45" cy="57" r="4" fill="#A9774A"/>`,
+  oil: `<rect x="42" y="4" width="16" height="12" rx="3" fill="#3E9B47"/><path d="M44 16h12v14l10 12v44a8 8 0 0 1-8 8H42a8 8 0 0 1-8-8V42l10-12z" fill="#EAF2CF" stroke="#9DBB55" stroke-width="3"/><path d="M37 54 h26 v32 a5 5 0 0 1 -5 5 h-16 a5 5 0 0 1 -5 -5z" fill="#E8C33A"/><ellipse cx="50" cy="70" rx="6" ry="8" fill="#556B2F"/>`,
+  spoons: `<g transform="rotate(-20 50 50)"><rect x="30" y="34" width="8" height="58" rx="4" fill="#C9792A"/><ellipse cx="34" cy="24" rx="12" ry="18" fill="#D99A4E"/></g><g transform="rotate(20 50 50)"><rect x="62" y="34" width="8" height="58" rx="4" fill="#C9792A"/><ellipse cx="66" cy="24" rx="12" ry="18" fill="#D99A4E"/></g>`,
+  hdBun: `<path d="M6 54 Q6 36 26 36 H74 Q94 36 94 54 Q94 70 74 70 H26 Q6 70 6 54Z" fill="#E39A4F"/><path d="M14 52 Q50 42 86 52" stroke="#F7D59A" stroke-width="8" fill="none" stroke-linecap="round"/>`,
+  sausage: `<g transform="rotate(-15 50 52)"><rect x="6" y="40" width="88" height="24" rx="12" fill="#E07B6A"/><rect x="14" y="44" width="70" height="5" rx="2.5" fill="#fff" opacity=".35"/></g>`,
+  onion: `<path d="M12 56 h76 a38 30 0 0 1 -76 0z" fill="#F7F3EC" stroke="#E2DACD" stroke-width="3"/>` + [[26, 50], [38, 44], [50, 50], [62, 44], [74, 50], [44, 54], [58, 54], [32, 54], [68, 54]].map(([x, y], i) => `<path d="M${x - 6} ${y} q6 -8 12 0" stroke="${i % 2 ? "#C98A3A" : "#E0A84A"}" stroke-width="5" fill="none" stroke-linecap="round"/>`).join(""),
+  cone: `<path d="M28 26 L72 26 L50 94Z" fill="#E3A85A"/><path d="M36 36 L60 70 M50 30 L68 56 M64 30 L40 66 M50 30 L32 56" stroke="#C98A3A" stroke-width="3"/><ellipse cx="50" cy="26" rx="22" ry="6" fill="#F0C07A"/>`,
+  cherry: `<path d="M50 56 C52 36 58 22 70 12" stroke="#3E7F2E" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M70 12 C80 10 86 16 84 22 C76 24 70 20 70 12Z" fill="#5DA23B"/><circle cx="48" cy="70" r="22" fill="#D6233A"/><ellipse cx="40" cy="62" rx="6" ry="4" fill="#fff" opacity=".5"/>`,
+  cut_car: cutterIcon("car"), cut_bear: cutterIcon("bear"), cut_star: cutterIcon("star"), cut_heart: cutterIcon("heart"),
+  scoop_s: scoopIcon(SCOOP.scoop_s.c), scoop_c: scoopIcon(SCOOP.scoop_c.c), scoop_v: scoopIcon(SCOOP.scoop_v.c),
+  scoop_m: scoopIcon(SCOOP.scoop_m.c, [[38, 40], [56, 32], [62, 50], [44, 54]].map(([x, y]) => `<rect x="${x}" y="${y}" width="6" height="4" rx="1.5" fill="#4A2C17"/>`).join("")),
+});
+Object.assign(NAME, {
+  water: "ВОДА", chicken: "КУРИЦА", carrot: "МОРКОВКА", noodles: "ЛАПША", salt: "СОЛЬ", greens: "ЗЕЛЕНЬ",
+  stove: "ПЛИТА", ladle: "ПОЛОВНИК", pot: "КАСТРЮЛЯ", butter: "МАСЛО", avocado: "АВОКАДО", oil: "МАСЛО", spoons: "ЛОЖКИ",
+  hdBun: "БУЛОЧКА", sausage: "СОСИСКА", onion: "ЛУК", cone: "РОЖОК", cherry: "ВИШЕНКА",
+  cut_car: "МАШИНКА", cut_bear: "МИШКА", cut_star: "ЗВЁЗДОЧКА", cut_heart: "СЕРДЕЧКО",
+  scoop_s: "КЛУБНИЧНОЕ", scoop_c: "ШОКОЛАДНОЕ", scoop_v: "ВАНИЛЬНОЕ", scoop_m: "МЯТНОЕ",
+});
+BOWL.butter = `<g transform="translate(-10 0) scale(1.4) translate(-50 -60)">${ICON.butter.replace(/<ellipse[^>]*\/>/, "")}</g>`;
+
+// ---------------------------- СУП С ЛАПШОЙ ----------------------------
+RECIPES.soup = {
+  title: "Суп",
+  shelf: ["water", "chicken", "carrot", "noodles", "salt", "greens"],
+  build(S) {
+    // плита с кнопкой, как в любимой игре
+    S.stove = G_(world, `<rect x="330" y="640" width="540" height="90" rx="24" fill="#6F8796"/><rect x="330" y="704" width="540" height="26" rx="13" fill="#5A7180"/>`);
+    S.stoveRing = S_("ellipse", { cx: 600, cy: 676, rx: 170, ry: 24, fill: "none", stroke: "#9FB4C2", "stroke-width": 6 }, S.stove);
+    G_(S.stove, `<circle cx="830" cy="684" r="20" fill="#FFF8EF"/>`);
+    S.power = S_("circle", { cx: 830, cy: 684, r: 10, fill: "#9AA5AF" }, S.stove);
+    S.targets.stove = S.stove;
+    S.pot = S_("g", {}, world);
+    const pg = G_(S.pot, `
+      <rect x="-252" y="22" width="56" height="24" rx="12" fill="#9AA5AF"/><rect x="196" y="22" width="56" height="24" rx="12" fill="#9AA5AF"/>
+      <path d="M-200 0 V200 Q-200 244 -156 244 H156 Q200 244 200 200 V0Z" fill="#E4513A"/>
+      <path d="M-170 40 V190" stroke="#F07A64" stroke-width="18" stroke-linecap="round"/>
+      <ellipse rx="200" ry="46" fill="#C9432F"/>
+      <ellipse rx="184" ry="38" fill="#3B2A26"/>
+      <clipPath id="potClip"><ellipse rx="184" ry="38"/></clipPath>`, { transform: "translate(600 410)" });
+    S.potIn = S_("g", { "clip-path": "url(#potClip)" }, pg);
+    S.broth = S_("ellipse", { rx: 184, ry: 38, fill: "#BFE3F2", opacity: 0 }, S.potIn);
+    S.potStuff = S_("g", {}, S.potIn);
+    S.bubbles = S_("g", {}, S.potIn);
+    const sw = S_("g", { transform: "scale(1 .21)" }, S.potIn);
+    S.swirl = G_(sw, `<path d="${spiral(160, 3)}" stroke="#F8D98A" stroke-width="14" fill="none" stroke-linecap="round"/>`);
+    S.swirl.setAttribute("opacity", 0);
+    S.ladle = G_(pg, `<path d="M150 -280 L40 -24" stroke="#8A949C" stroke-width="16" stroke-linecap="round"/><ellipse cx="30" cy="-14" rx="46" ry="16" fill="#C9CDD2"/>`);
+    S.ladle.style.display = "none";
+    S.steam = S_("g", { transform: "translate(600 360)" }, world);
+    S.targets.pot = S.pot;
+    // глубокая тарелка
+    G_(world, `<ellipse cx="1240" cy="716" rx="200" ry="40" fill="#E7DCCB"/><path d="M1010 630 Q1020 726 1240 730 Q1460 726 1470 630 Z" fill="#EFE8DC"/><ellipse cx="1240" cy="630" rx="230" ry="56" fill="#FFFFFF"/><ellipse cx="1240" cy="636" rx="180" ry="40" fill="#EDE5D8"/>`);
+    S.plate = S_("g", {}, world);
+    S.soup = S_("g", {}, S.plate);
+    S.soup.style.visibility = "hidden";
+    S.targets.plate = S.plate;
+    G_(S.plate, `<rect x="1060" y="590" width="360" height="90" fill="transparent"/>`);
+  },
+  steps: [
+    { kind: "drag", item: "water", target: "pot", say: "sp_intro", run: S => { SFX.pour(); return tween(900, t => S.broth.setAttribute("opacity", (.9 * t).toFixed(2))); } },
+    { kind: "drag", item: "chicken", target: "pot", say: "sp_chicken",
+      run: async S => {
+        for (const [x, y, r] of [[-70, -4, -20], [60, 6, 25]]) { const g = place(S.potStuff, x, y, `<g transform="translate(-50 -52) scale(.9)">${ICON.chicken}</g>`, r); popIn(g); SFX.drop(); await sleep(200); }
+      } },
+    { kind: "tap", target: "stove", times: 1, say: "sp_stove",
+      run: async S => {
+        SFX.pop();
+        S.power.setAttribute("fill", "#E4513A");
+        S.stoveRing.setAttribute("stroke", "#FF7A50");
+        say("sp_boil");
+        steamOn(S);
+        S.bubbles.innerHTML = Array.from({ length: 12 }, (_, i) => `<circle class="bub" style="animation-delay:${(i * .17).toFixed(2)}s" cx="${rnd(-150, 150).toFixed(0)}" cy="${rnd(-26, 26).toFixed(0)}" r="${rnd(6, 11).toFixed(0)}" fill="#FFFFFF"/>`).join("");
+        await tween(3200, t => S.broth.setAttribute("fill", lerpHex("#BFE3F2", "#F2C35A", t)), t => t);
+        S.broth.setAttribute("fill", "#F2C35A");
+      } },
+    { kind: "drag", item: "carrot", target: "pot", say: "sp_carrot",
+      run: async S => { for (let i = 0; i < 9; i++) { const g = place(S.potStuff, rnd(-150, 150).toFixed(0), rnd(-24, 24).toFixed(0), `<ellipse rx="14" ry="8" fill="#F28C28"/><ellipse rx="7" ry="4" fill="#F6A85A"/>`); popIn(g); await sleep(60); } SFX.drop(); } },
+    { kind: "drag", item: "noodles", target: "pot", say: "sp_noodles",
+      run: async S => { for (let i = 0; i < 10; i++) { const g = place(S.potStuff, rnd(-140, 140).toFixed(0), rnd(-22, 22).toFixed(0), `<path d="M-30 0 q7 -8 15 0 t15 0 t15 0 t15 0" stroke="#F7E3A1" stroke-width="6" fill="none" stroke-linecap="round"/>`, rnd(-30, 30)); popIn(g); await sleep(60); } SFX.drop(); } },
+    { kind: "drag", item: "salt", target: "pot", say: "sp_salt", run: async S => { SFX.sprinkle(); await sleep(500); } },
+    { kind: "mix", target: "pot", say: "sp_stir", ms: 2400, motor: 0, hint: "ladle", shake: "ladle",
+      enter(S) { S.ladle.style.display = ""; popIn(S.ladle); },
+      progress(S, p) { S.swirl.setAttribute("opacity", Math.min(.8, p * 3).toFixed(2)); },
+      run: async S => { await fadeOut(S.ladle, 300); S.ladle.style.display = "none"; S.swirl.setAttribute("opacity", 0); } },
+    { kind: "drag", item: "greens", target: "pot", say: "sp_greens",
+      run: async S => { for (let i = 0; i < 12; i++) { const g = place(S.potStuff, rnd(-150, 150).toFixed(0), rnd(-24, 24).toFixed(0), `<path d="M-9 0 Q0 -8 9 0 Q0 5 -9 0Z" fill="#5DA23B"/>`, rnd(0, 180)); popIn(g); await sleep(40); } } },
+    { kind: "tap", target: "pot", times: 1, say: "sp_pour", hint: "pot",
+      run: async S => {
+        // в тарелке появляется то же, что сварили
+        S.soup.innerHTML = `<ellipse cx="1240" cy="636" rx="180" ry="40" fill="#F2C35A"/>` +
+          Array.from({ length: 7 }, () => `<path d="M${(1240 + rnd(-120, 90)).toFixed(0)} ${(636 + rnd(-18, 18)).toFixed(0)} q6 -7 13 0 t13 0 t13 0" stroke="#F7E3A1" stroke-width="5" fill="none" stroke-linecap="round"/>`).join("") +
+          Array.from({ length: 6 }, () => `<ellipse cx="${(1240 + rnd(-130, 130)).toFixed(0)}" cy="${(636 + rnd(-20, 20)).toFixed(0)}" rx="11" ry="6" fill="#F28C28"/>`).join("") +
+          Array.from({ length: 8 }, () => `<ellipse cx="${(1240 + rnd(-140, 140)).toFixed(0)}" cy="${(636 + rnd(-22, 22)).toFixed(0)}" rx="7" ry="4" fill="#5DA23B"/>`).join("");
+        S.pot.classList.add("fb");
+        await S.pot.animate([{ transform: "none" }, { transform: "translate(420px,-180px) rotate(38deg) scale(.8)" }], { duration: 650, easing: "ease-in-out", fill: "forwards" }).finished;
+        const st = S_("rect", { x: 1176, y: 300, width: 30, height: 0, rx: 15, fill: "#F2C35A" }, world);
+        SFX.pour();
+        await tween(300, t => st.setAttribute("height", 330 * t));
+        S.soup.style.visibility = "";
+        S.soup.classList.add("fb");
+        await S.soup.animate([{ transform: "scale(.3)", opacity: 0 }, { transform: "scale(1)", opacity: 1 }], { duration: 900, easing: "ease-out" }).finished;
+        await tween(200, t => { st.setAttribute("y", 300 + 330 * t); st.setAttribute("height", 330 * (1 - t)); });
+        st.remove();
+        steamOff(S);
+        S.power.setAttribute("fill", "#9AA5AF"); S.stoveRing.setAttribute("stroke", "#9FB4C2");
+        await S.pot.animate([{ transform: "translate(420px,-180px) rotate(38deg) scale(.8)" }, { transform: "none" }], { duration: 550, easing: "ease-in-out", fill: "forwards" }).finished;
+      } },
+    { kind: "drink", target: "plate", sips: 7, say: "spoon", hint: "eat",
+      drain(S, f) { S.soup.style.transform = `scale(${(1 - .7 * f).toFixed(2)})`; S.soup.style.opacity = f >= 1 ? 0 : 1; } },
+  ],
+};
+
+// ---------------------------- ЯИЧНИЦА ----------------------------
+// всё, что жарится, рисуем дважды: на сковородке и (пока невидимым) на тарелке
+function addEgg(S, html, x, y, rot = 0) {
+  place(S.eggPlate, x, y, html, rot);
+  return place(S.eggPan, x, y, html, rot);
+}
+const EGG_WHITE = `<path d="M-62 -6 C-64 -36 -20 -46 6 -40 C42 -42 68 -22 62 4 C60 32 20 40 -4 36 C-38 38 -60 24 -62 -6Z" fill="#FFFFFF"/>`;
+const EGG_YOLK = `<ellipse rx="24" ry="18" fill="#F7B733"/><ellipse cx="-7" cy="-6" rx="7" ry="4" fill="#FFD27A"/>`;
+RECIPES.eggs = {
+  title: "Яичница",
+  shelf: ["butter", "egg", "salami", "tomato", "cheese"],
+  build(S) {
+    buildPan(S, 580, 600, 1.45);
+    S.eggPan = S_("g", {}, S.panIn);
+    G_(world, `<ellipse cx="1300" cy="722" rx="230" ry="56" fill="#E7DCCB"/><ellipse cx="1300" cy="712" rx="230" ry="54" fill="#F7F3EC"/><ellipse cx="1300" cy="712" rx="176" ry="38" fill="#EDE5D8"/>`);
+    S.eggDish = S_("g", {}, world);
+    S.eggPlate = S_("g", { transform: "translate(1300 706) scale(.95)" }, S.eggDish);
+    S.eggDish.style.visibility = "hidden";
+    S.targets.dish = S.eggDish;
+  },
+  steps: [
+    { kind: "drag", item: "butter", target: "pan", say: "eg_intro",
+      run: async S => {
+        const cube = place(S.panIn, 0, -10, `<g transform="scale(1.1) translate(-50 -60)">${ICON.butter.replace(/<ellipse[^>]*\/>/, "")}</g>`);
+        SFX.drop(); await dropIn(cube, -160);
+        const pud = S_("ellipse", { rx: 0, ry: 0, fill: "#F7D36A", opacity: .55 }, S.panIn);
+        S.panIn.insertBefore(pud, S.eggPan);
+        S.sizzle = loopSizzle();
+        await tween(1100, t => { pud.setAttribute("rx", 140 * t); pud.setAttribute("ry", 46 * t); cube.style.opacity = 1 - t; cube.style.transform = `scale(${1 - .6 * t})`; });
+        cube.parentNode.remove();
+      } },
+    { kind: "drag", item: "egg", target: "pan", say: "ck_eggs",
+      run: async S => {
+        S.whites = [];
+        for (const [x, y] of [[-72, 0], [74, 6]]) {
+          SFX.crack();
+          const w = addEgg(S, EGG_WHITE, x, y); w.style.opacity = .55; S.whites.push(w);
+          popIn(w);
+          popIn(addEgg(S, EGG_YOLK, x, y - 4), 150);
+          await sleep(450);
+        }
+      } },
+    { kind: "drag", item: "salami", target: "pan", say: "eg_salami",
+      run: async S => { for (const [x, y] of [[-145, -12], [0, -36], [6, 34], [146, -4], [-104, 34]]) { popIn(addEgg(S, `<ellipse rx="25" ry="11" fill="#A82A24"/><ellipse rx="21" ry="9" fill="#D0423A"/><circle cx="-6" cy="-2" r="2.4" fill="#F5B8A8"/><circle cx="7" cy="2" r="2.4" fill="#F5B8A8"/>`, x, y)); SFX.pop(); await sleep(100); } } },
+    { kind: "drag", item: "tomato", target: "pan", say: "pz_tomato",
+      run: async S => { for (const [x, y] of [[-120, -36], [42, -38], [124, 34], [-26, 40]]) { popIn(addEgg(S, `<ellipse rx="22" ry="10" fill="#E2402F"/><ellipse rx="16" ry="7" fill="#F0705A"/>`, x, y)); SFX.pop(); await sleep(100); } } },
+    { kind: "drag", item: "cheese", target: "pan", say: "pz_cheese",
+      run: async S => { SFX.sprinkle(); for (let i = 0; i < 26; i++) { const a = rnd(0, 6.28), r = Math.sqrt(Math.random()); const g = addEgg(S, `<rect x="-9" y="-3" width="18" height="6" rx="3" fill="${pick(["#F8D35A", "#FCE38A"])}"/>`, (150 * r * Math.cos(a)).toFixed(0), (46 * r * Math.sin(a)).toFixed(0), rnd(0, 180)); popIn(g); await sleep(25); } } },
+    { kind: "auto", run: async S => { steamOn(S); await say("fry"); await tween(1500, t => S.whites.forEach(w => w.style.opacity = (.55 + .45 * t).toFixed(2))); } },
+    { kind: "tap", target: "pan", times: 1, say: "eg_plate",
+      run: async S => {
+        S.sizzle && S.sizzle(); steamOff(S);
+        await flyTo(S.eggPan, 1300, 706, .95 / 1.45);
+        S.eggPan.style.visibility = "hidden";
+        S.eggDish.style.visibility = "";
+        SFX.drop();
+      } },
+    { kind: "eat", target: "dish", bites: 8 },
+  ],
+};
+
+// ---------------------------- САЛАТ ----------------------------
+const VEG = {
+  tomato: { whole: `<g transform="translate(-78 -86) scale(1.55)">${ICON.tomato}</g>`, sliced: [-50, -16, 18, 52].map(x => `<g transform="translate(${x} 0)"><ellipse rx="14" ry="44" fill="#E2402F"/><ellipse rx="9" ry="36" fill="#F0705A"/></g>`).join(""),
+    piece: `<path d="M-18 6 A18 18 0 0 1 18 6 Z" fill="#E3412F"/><path d="M-12 4 A12 12 0 0 1 12 4Z" fill="#F0705A"/>` },
+  pickle: { whole: `<rect x="-140" y="-28" width="280" height="56" rx="28" fill="#4E9A3C"/><rect x="-118" y="-18" width="210" height="9" rx="4.5" fill="#79BE5C"/>`, sliced: [-105, -60, -15, 30, 75, 120].map(x => `<g transform="translate(${x} 0)"><ellipse rx="14" ry="28" fill="#4E9A3C"/><ellipse rx="10" ry="23" fill="#B8DC7E"/></g>`).join(""),
+    piece: `<ellipse rx="16" ry="9" fill="#4E9A3C"/><ellipse rx="13" ry="7" fill="#B8DC7E"/>` },
+  avocado: { whole: `<g transform="rotate(90) translate(-60 -62) scale(1.2)">${ICON.avocado}</g>`, sliced: [-60, -20, 20, 60].map(x => [-22, 22].map(y => `<rect x="${x - 17}" y="${y - 17}" width="34" height="34" rx="6" fill="#C8E07A" stroke="#8DB04A" stroke-width="3"/>`).join("")).join(""),
+    piece: `<rect x="-11" y="-8" width="22" height="16" rx="4" fill="#C8E07A" stroke="#8DB04A" stroke-width="2"/>` },
+};
+function saladCut(veg, say0) {
+  return [
+    { kind: "drag", item: veg, target: "board", say: say0,
+      run: async S => { S.veg = place(world, 430, 636, VEG[veg].whole); SFX.drop(); await dropIn(S.veg, -200); } },
+    { kind: "tap", target: "board", times: 3, say: "sl_cut", hint: "cutter",
+      enter(S) { S.knife.style.display = ""; popIn(S.knife); },
+      onTap(S, i) {
+        SFX.chop();
+        S.knife.getAnimations().forEach(a => a.cancel());
+        S.knife.animate([{ transform: "translateY(0)" }, { transform: "translateY(70px)" }, { transform: "translateY(0)" }], { duration: 260, easing: "ease-in-out" });
+        S_("line", { x1: -40 + i * 40, y1: -60, x2: -40 + i * 40, y2: 60, stroke: "#FFFFFF", "stroke-width": 5, opacity: .7 }, S.veg);
+      },
+      run: async S => {
+        await sleep(250);
+        S.knife.style.display = "none";
+        S.veg.innerHTML = VEG[veg].sliced;
+        popIn(S.veg, 0, 300);
+        await sleep(450);
+        await flyTo(S.veg, 1120, 560, .45);
+        S.veg.parentNode.remove();
+        for (let i = 0; i < 7; i++) S.salad.push(place(S.saladG, rnd(-150, 150).toFixed(0), rnd(-28, 28).toFixed(0), VEG[veg].piece, rnd(-40, 40)));
+        SFX.drop();
+      } },
+  ];
+}
+RECIPES.salad = {
+  title: "Салат",
+  shelf: ["tomato", "pickle", "avocado", "greens", "oil"],
+  build(S) {
+    S.board = G_(world, `<rect x="180" y="548" width="500" height="200" rx="34" fill="#B87A40"/><rect x="180" y="538" width="500" height="200" rx="34" fill="#D29A5C"/><circle cx="648" cy="638" r="13" fill="#B87A40"/>`);
+    S.targets.board = S.board;
+    buildBowl(S, 1120, 560, .85, "spoons");
+    S.saladG = S_("g", {}, S.bowlIn);
+    S.salad = [];
+    S.knife = place(world, 430, 470, `<g transform="rotate(10)"><path d="M-20 -150 C10 -140 18 -60 14 10 H-14 Z" fill="#D5DADF"/><path d="M-20 -150 C-4 -140 2 -60 0 10 H-6 Z" fill="#EEF1F3"/><rect x="-18" y="8" width="36" height="80" rx="14" fill="#A86C38"/></g>`);
+    S.knife.style.display = "none";
+    S.targets.dish = S.bowl;
+  },
+  steps: [
+    ...saladCut("tomato", "sl_intro"),
+    ...saladCut("pickle", "sl_cucumber"),
+    ...saladCut("avocado", "sl_avocado"),
+    { kind: "drag", item: "greens", target: "bowl", say: "sl_greens",
+      run: async S => { for (let i = 0; i < 10; i++) { const g = place(S.saladG, rnd(-150, 150).toFixed(0), rnd(-28, 28).toFixed(0), `<path d="M-14 0 Q0 -12 14 0 Q0 8 -14 0Z" fill="${pick(["#5DA23B", "#7CC04E"])}"/>`, rnd(0, 180)); S.salad.push(g); popIn(g); await sleep(40); } } },
+    { kind: "drag", item: "oil", target: "bowl", say: "sl_oil",
+      run: async S => { SFX.squirt(); for (let i = 0; i < 6; i++) { const g = place(S.saladG, rnd(-130, 130).toFixed(0), rnd(-24, 24).toFixed(0), `<ellipse rx="20" ry="5" fill="#F2D24A" opacity=".75"/>`); popIn(g); await sleep(80); } } },
+    { kind: "mix", target: "bowl", say: "sl_mix", ms: 2400, motor: 0, hint: "spoons", shake: "toolWrap",
+      enter(S) { S.toolWrap.style.display = ""; popIn(S.toolWrap); },
+      // салат «подбрасывается»: кусочки прыгают на новые места
+      progress(S) {
+        if (S.tossAt && performance.now() - S.tossAt < 120) return;
+        S.tossAt = performance.now();
+        for (let i = 0; i < 4; i++) { const g = pick(S.salad); g.parentNode.setAttribute("transform", `translate(${rnd(-150, 150).toFixed(0)} ${rnd(-28, 28).toFixed(0)}) rotate(${rnd(-40, 40).toFixed(0)})`); }
+      },
+      run: async S => { await fadeOut(S.toolWrap, 300); S.toolWrap.style.display = "none"; } },
+    { kind: "drink", target: "bowl", sips: 7, say: "spoon", hint: "eat",
+      drain(S, f) { const all = [...S.saladG.children]; all.slice(0, Math.round(all.length * f)).forEach(c => c.style.display = "none"); } },
+  ],
+};
+
+// ---------------------------- ХОТ-ДОГ ----------------------------
+const SAUSAGE = c => `<rect x="-270" y="-24" width="540" height="48" rx="24" fill="${c}"/><rect x="-248" y="-16" width="470" height="8" rx="4" fill="#fff" opacity=".25"/>`;
+const GRILL = [-200, -120, -40, 40, 120, 200].map(x => `<path d="M${x - 10} 14 L${x + 10} -14" stroke="#8E3A28" stroke-width="7" stroke-linecap="round" opacity=".7"/>`).join("");
+RECIPES.hotdog = {
+  title: "Хот-дог",
+  shelf: ["hdBun", "sausage", "sauce", "cheese", "pickle", "onion"],
+  build(S) {
+    S.area = S_("g", {}, world);
+    G_(S.area, `<ellipse cx="600" cy="712" rx="320" ry="68" fill="#E7DCCB"/><ellipse cx="600" cy="702" rx="320" ry="66" fill="#F7F3EC"/><ellipse cx="600" cy="702" rx="250" ry="46" fill="#EDE5D8"/>`);
+    S.hd = S_("g", {}, S.area);
+    S.bunBack = G_(S.hd, `<path d="M340 646 Q340 584 410 578 H790 Q860 584 860 646 Z" fill="#E39A4F"/><path d="M366 634 Q600 596 834 634 Q600 656 366 634Z" fill="#F7D59A"/>`);
+    S.sausBun = place(S.hd, 600, 612, SAUSAGE("#C8553D") + GRILL);
+    S.hdTops = S_("g", {}, S.hd);
+    S.bunFront = G_(S.hd, `<path d="M340 640 Q600 684 860 640 Q866 700 790 708 H410 Q334 700 340 640Z" fill="#DE9248"/><path d="M400 680 Q600 702 800 680" stroke="#EDB070" stroke-width="10" fill="none" stroke-linecap="round"/>`);
+    [S.bunBack, S.sausBun, S.bunFront].forEach(e => e.style.display = "none");
+    S.targets.plate = S.area;
+    S.targets.dish = S.hd;
+    buildPan(S, 1220, 640);
+  },
+  steps: [
+    { kind: "drag", item: "hdBun", target: "plate", say: "hd_intro",
+      run: async S => { S.bunBack.style.display = S.bunFront.style.display = ""; SFX.drop(); dropIn(S.bunBack); await dropIn(S.bunFront); } },
+    { kind: "drag", item: "sausage", target: "pan", say: "hd_sausage",
+      run: async S => {
+        S.ps = place(S.panIn, 0, 0, `<g transform="scale(.55)">${SAUSAGE("#E07B6A")}</g>`);
+        S.psCook = G_(S.ps, `<g transform="scale(.55)">${SAUSAGE("#C8553D")}${GRILL}</g>`);
+        S.psCook.setAttribute("opacity", 0);
+        SFX.drop(); await dropIn(S.ps, -160);
+        S.sizzle = loopSizzle(); steamOn(S);
+      } },
+    { kind: "auto", run: async S => { await say("fry"); await tween(2200, t => S.psCook.setAttribute("opacity", t.toFixed(2))); } },
+    { kind: "tap", target: "pan", times: 1, say: "hd_go",
+      run: async S => {
+        S.sizzle && S.sizzle(); steamOff(S);
+        await flyTo(S.ps, 600, 612, 1 / .55);
+        S.ps.parentNode.remove();
+        S.sausBun.style.display = "";
+        SFX.drop();
+      } },
+    { kind: "drag", item: "sauce", target: "plate", say: "hd_sauce",
+      run: S => { SFX.squirt(); const g = place(S.hdTops, 600, 600, `<path d="M-230 0 Q-210 -22 -190 0 T-150 0 T-110 0 T-70 0 T-30 0 T10 0 T50 0 T90 0 T130 0 T170 0 T210 0" stroke="#C8231C" stroke-width="12" fill="none" stroke-linecap="round"/>`); const p = g.querySelector("path"); p.setAttribute("stroke-dasharray", 700); return tween(800, t => p.setAttribute("stroke-dashoffset", 700 * (1 - t))); } },
+    { kind: "drag", item: "cheese", target: "plate", say: "pz_cheese",
+      run: async S => { SFX.sprinkle(); for (let i = 0; i < 24; i++) { const g = place(S.hdTops, (600 + rnd(-220, 220)).toFixed(0), (596 + rnd(-10, 6)).toFixed(0), `<rect x="-10" y="-3" width="20" height="7" rx="3.5" fill="${pick(["#F8D35A", "#FCE38A"])}"/>`, rnd(-40, 40)); popIn(g); await sleep(25); } } },
+    { kind: "drag", item: "pickle", target: "plate", say: "bg_pickle",
+      run: async S => { for (const x of [-180, -90, 0, 90, 180]) { popIn(place(S.hdTops, 600 + x, 592, `<ellipse rx="26" ry="10" fill="#9CCB5E" stroke="#5E9B3A" stroke-width="4"/>`)); SFX.pop(); await sleep(90); } } },
+    { kind: "drag", item: "onion", target: "plate", say: "hd_onion",
+      run: async S => { SFX.sprinkle(); for (let i = 0; i < 22; i++) { const g = place(S.hdTops, (600 + rnd(-220, 220)).toFixed(0), (586 + rnd(-10, 8)).toFixed(0), `<path d="M-8 0 q8 -10 16 0" stroke="${pick(["#C98A3A", "#E0A84A", "#B8742F"])}" stroke-width="6" fill="none" stroke-linecap="round"/>`, rnd(-60, 60)); popIn(g); await sleep(30); } } },
+    { kind: "eat", target: "dish", bites: 8 },
+  ],
+};
+
+// ---------------------------- ПЕЧЕНЬЕ ----------------------------
+const COOKIE_SLOTS = [[460, 530], [600, 530], [740, 530], [460, 660], [600, 660], [740, 660]];
+RECIPES.cookies = {
+  title: "Печенье",
+  shelf: ["flour", "butter", "sugar", "egg"],
+  build(S) {
+    buildBowl(S, 600, 560, 1, "mixer");
+    S.cboard = G_(world, `<rect x="270" y="444" width="660" height="330" rx="34" fill="#B87A40"/><rect x="270" y="432" width="660" height="330" rx="34" fill="#D29A5C"/>`);
+    S.cboard.style.display = "none";
+    S.sheet = S_("rect", { x: 520, y: 545, width: 160, height: 100, rx: 50, fill: "#F3D3A0" }, S.cboard);
+    S.cookies = S_("g", {}, world);
+    S.cookieList = [];
+    S.targets.board = S.cboard;
+    S.targets.dish = S.cookies;
+    buildOven(S);
+  },
+  steps: [
+    { kind: "drag", item: "flour", target: "bowl", say: "co_intro", run: S => { SFX.puff(); fillBowl(S, "flour"); return sleep(400); } },
+    { kind: "drag", item: "butter", target: "bowl", say: "co_butter", run: S => { SFX.drop(); fillBowl(S, "butter"); return sleep(400); } },
+    { kind: "drag", item: "sugar", target: "bowl", say: "ck_sugar", run: S => { SFX.sprinkle(); fillBowl(S, "sugar"); return sleep(400); } },
+    { kind: "drag", item: "egg", target: "bowl", say: "pc_egg", run: async S => { SFX.crack(); fillBowl(S, "egg2"); await sleep(400); } },
+    { kind: "mix", target: "bowl", say: "co_mix", ms: 2600, motor: 95, hint: "mixer", shake: "toolWrap",
+      enter(S) { bowlBatterLayer(S, "#F3D3A0"); S.toolWrap.style.display = ""; popIn(S.toolWrap); },
+      progress(S, p) { S.batter.setAttribute("opacity", p.toFixed(2)); S.swirl.setAttribute("opacity", Math.min(1, p * 3).toFixed(2)); },
+      run: async S => { await fadeOut(S.toolWrap, 300); S.toolWrap.style.display = "none"; } },
+    { kind: "tap", target: "bowl", times: 1, say: "co_dough",
+      run: async S => {
+        S.bowl.classList.add("fb");
+        await S.bowl.animate([{ transform: "none", opacity: 1 }, { transform: "translate(-700px,-260px) scale(.5)", opacity: 0 }], { duration: 550, easing: "ease-in", fill: "forwards" }).finished;
+        S.bowl.style.display = "none";
+        S.cboard.style.display = "";
+        popIn(S.cboard);
+        SFX.drop();
+        await sleep(400);
+      } },
+    { kind: "tap", target: "board", times: 3, say: "pz_roll", hint: "pin",
+      enter(S) {
+        S.pin = place(world, 600, 595, `<rect x="-340" y="-15" width="80" height="30" rx="15" fill="#A86C38"/><rect x="260" y="-15" width="80" height="30" rx="15" fill="#A86C38"/><rect x="-270" y="-26" width="540" height="52" rx="26" fill="#E2B27A"/><rect x="-250" y="-18" width="500" height="10" rx="5" fill="#F0CB9A"/>`);
+        popIn(S.pin);
+      },
+      onTap(S, i) {
+        SFX.roll();
+        S.pin.getAnimations().forEach(a => a.cancel());
+        S.pin.animate([{ transform: "translateY(0)" }, { transform: "translateY(-90px)" }, { transform: "translateY(90px)" }, { transform: "translateY(0)" }], { duration: 600, easing: "ease-in-out" });
+        const w0 = +S.sheet.getAttribute("width"), h0 = +S.sheet.getAttribute("height");
+        const w1 = 160 + (i + 1) * 120, h1 = 100 + (i + 1) * 54;
+        tween(600, t => { const w = w0 + (w1 - w0) * t, h = h0 + (h1 - h0) * t; S.sheet.setAttribute("width", w); S.sheet.setAttribute("height", h); S.sheet.setAttribute("x", 600 - w / 2); S.sheet.setAttribute("y", 595 - h / 2); S.sheet.setAttribute("rx", Math.min(50, h / 2) * (1 - t * .6)); });
+      },
+      run: async S => { await sleep(500); await fadeOut(S.pin, 300); S.pin.parentNode.remove(); } },
+    { kind: "pick", items: ["cut_car", "cut_bear", "cut_star", "cut_heart"], target: "board", say: "co_cut", min: 3, max: 6,
+      async place(S, id) {
+        const [x, y] = COOKIE_SLOTS[S.cookieList.length];
+        const kind = id.slice(4);
+        const ck = place(S.cookies, x, y, `<g fill="#F3D3A0" stroke="#D9A866" stroke-width="4" stroke-linejoin="round">${COOKIE[kind]}</g>`);
+        S.cookieList.push({ kind, g: ck });
+        const cutter = place(world, x, y, `<g fill="none" stroke="#8A949C" stroke-width="9" stroke-linejoin="round">${COOKIE[kind]}</g>`);
+        await cutter.animate([{ transform: "translateY(-90px)", opacity: 0 }, { transform: "translateY(0)", opacity: 1 }], { duration: 250, easing: "ease-in" }).finished;
+        SFX.chop();
+        popIn(ck);
+        await cutter.animate([{ transform: "translateY(0)", opacity: 1 }, { transform: "translateY(-90px)", opacity: 0 }], { duration: 300, easing: "ease-out", fill: "forwards" }).finished;
+        cutter.parentNode.remove();
+      } },
+    { kind: "tap", target: "oven", times: 1, say: "ck_oven",
+      run: async S => {
+        await fadeOut(S.sheet, 400);
+        await bake(S, S.cookies, `<rect x="1140" y="560" width="220" height="16" rx="6" fill="#9AA5AF"/>` + [1170, 1220, 1270, 1320].map(x => `<circle cx="${x}" cy="548" r="18" fill="#F3D3A0"/>`).join(""),
+          () => S.cookieList.forEach(c => {
+            const g = c.g.firstElementChild; g.setAttribute("fill", "#E3A65A"); g.setAttribute("stroke", "#B97A3A");
+            if (c.kind === "bear") G_(c.g, `<circle cx="-14" cy="-6" r="5" fill="#6B3B22"/><circle cx="14" cy="-6" r="5" fill="#6B3B22"/><ellipse cy="12" rx="9" ry="7" fill="#6B3B22"/>`);
+            if (c.kind === "car") G_(c.g, `<rect x="-14" y="-26" width="12" height="14" rx="3" fill="#F3D3A0"/><rect x="4" y="-26" width="12" height="14" rx="3" fill="#F3D3A0"/>`);
+          }));
+      } },
+    { kind: "eat", target: "dish", bites: 9 },
+  ],
+};
+
+// ---------------------------- МОРОЖЕНОЕ ----------------------------
+const SCOOP_Y = [425, 320, 215];
+RECIPES.icecream = {
+  title: "Мороженое",
+  shelf: ["cone"],
+  build(S) {
+    S.stand = G_(world, `<ellipse cx="600" cy="782" rx="130" ry="22" fill="#B9C2CA"/><rect x="588" y="610" width="24" height="170" rx="8" fill="#C9CDD2"/>`);
+    S.targets.stand = S.stand;
+    S.ice = S_("g", {}, world);
+    S.coneG = G_(S.ice, `<path d="M506 470 L694 470 L600 762Z" fill="#E3A85A"/>` + [0, 1, 2, 3, 4].map(i => `<path d="M${520 + i * 40} 472 L${600 + (i - 2) * 8} 760" stroke="#C98A3A" stroke-width="4"/><path d="M${680 - i * 40} 472 L${600 - (i - 2) * 8} 760" stroke="#C98A3A" stroke-width="4"/>`).join("") + `<ellipse cx="600" cy="470" rx="96" ry="22" fill="#F0C07A"/>`);
+    S.coneG.style.display = "none";
+    S.scoops = S_("g", {}, S.ice);
+    S.iceTops = S_("g", {}, S.ice);
+    S.ring = G_(world, `<path d="M534 614 A66 16 0 0 0 666 614" stroke="#9AA5AF" stroke-width="12" fill="none" stroke-linecap="round"/>`);
+    S.ring.style.display = "none";
+    S.nScoops = 0;
+    S.targets.icecream = S.ice;
+    S.targets.dish = S.ice;
+  },
+  steps: [
+    { kind: "drag", item: "cone", target: "stand", say: "ic_intro",
+      run: async S => { S.coneG.style.display = S.ring.style.display = ""; SFX.drop(); await dropIn(S.coneG, -220); } },
+    { kind: "pick", items: ["scoop_s", "scoop_c", "scoop_v", "scoop_m"], target: "icecream", say: "ic_scoops", min: 1, max: 3,
+      place(S, id) {
+        const y = SCOOP_Y[S.nScoops++], c = SCOOP[id].c;
+        const g = place(S.scoops, 600, y, `<circle r="84" fill="${c}"/><path d="M-84 8 Q-72 42 -58 26 Q-46 54 -30 34 Q-16 58 0 36 Q16 60 30 34 Q46 54 58 26 Q72 42 84 8 Z" fill="${c}"/><ellipse cx="-32" cy="-36" rx="24" ry="15" fill="#fff" opacity=".35"/>${SCOOP[id].dots}`);
+        S.topY = y;
+        SFX.drop(); dropIn(g, -200);
+      } },
+    { kind: "pick", items: ["sprinkles", "cherry", "chocolate"], target: "icecream", say: "ic_top", min: 1, max: 8,
+      place(S, id, pt) {
+        const cy = S.topY;
+        let x = pt ? pt.x : 600 + rnd(-50, 50), y = pt ? pt.y : cy + rnd(-50, 10);
+        const d = Math.hypot(x - 600, y - cy);
+        if (d > 62) { x = 600 + (x - 600) * 62 / d; y = cy + (y - cy) * 62 / d; }
+        if (id === "cherry" && !S.cherry) { S.cherry = true; x = 600; y = cy - 84; }
+        const html = {
+          sprinkles: ring(0, 0, 0, 8, (a, b, c, i) => { const x0 = rnd(-30, 30), y0 = rnd(-24, 24); return `<rect x="${(x0 - 7).toFixed(0)}" y="${(y0 - 3).toFixed(0)}" width="14" height="6" rx="3" fill="${["#E4513A", "#3E9B4F", "#4A90D9", "#F6B92B", "#9C5BD0"][i % 5]}" transform="rotate(${rnd(0, 180).toFixed(0)} ${x0.toFixed(0)} ${y0.toFixed(0)})"/>`; }),
+          cherry: `<g transform="translate(-50 -78) scale(.75)">${ICON.cherry}</g>`,
+          chocolate: `<path d="M-50 0 Q-36 22 -22 4 Q-8 26 6 4 Q20 26 34 4 Q44 18 50 2" stroke="#5A2E18" stroke-width="10" fill="none" stroke-linecap="round"/>`,
+        }[id];
+        const g = place(S.iceTops, x.toFixed(0), y.toFixed(0), html);
+        popIn(g);
+        id === "sprinkles" ? SFX.sprinkle() : SFX.pop();
+      } },
+    { kind: "eat", target: "dish", bites: 9 },
+  ],
+};
+
+// значки новых блюд для меню (200 × 200)
+const NEW_DISH_ICON = {
+  soup: `<ellipse cx="100" cy="176" rx="88" ry="16" fill="#E7DCCB"/><path d="M8 110 Q14 176 100 178 Q186 176 192 110 Z" fill="#EFE8DC"/><ellipse cx="100" cy="110" rx="92" ry="26" fill="#FFFFFF"/><ellipse cx="100" cy="113" rx="74" ry="18" fill="#F2C35A"/>` +
+    [[70, 110], [104, 118], [124, 106]].map(([x, y]) => `<path d="M${x - 16} ${y} q5 -6 10 0 t10 0 t10 0" stroke="#F7E3A1" stroke-width="4" fill="none" stroke-linecap="round"/>`).join("") +
+    `<ellipse cx="88" cy="104" rx="8" ry="4" fill="#F28C28"/><ellipse cx="136" cy="116" rx="8" ry="4" fill="#F28C28"/><ellipse cx="60" cy="118" rx="5" ry="3" fill="#5DA23B"/><ellipse cx="114" cy="102" rx="5" ry="3" fill="#5DA23B"/>` +
+    `<path d="M70 70 q-10 -14 0 -28 q10 -14 0 -28 M100 76 q-10 -14 0 -28 q10 -14 0 -28 M130 70 q-10 -14 0 -28 q10 -14 0 -28" stroke="#E2DACD" stroke-width="6" fill="none" stroke-linecap="round"/>`,
+  eggs: `<ellipse cx="100" cy="134" rx="92" ry="40" fill="#E7DCCB"/><ellipse cx="100" cy="128" rx="92" ry="38" fill="#F7F3EC"/><g transform="translate(68 120) scale(.55)">${EGG_WHITE}${EGG_YOLK}</g><g transform="translate(134 126) scale(.55)">${EGG_WHITE}${EGG_YOLK}</g><ellipse cx="102" cy="104" rx="14" ry="6" fill="#D0423A"/><ellipse cx="100" cy="146" rx="12" ry="5" fill="#E2402F"/><rect x="88" y="120" width="12" height="4" rx="2" fill="#F8D35A"/><rect x="40" y="128" width="12" height="4" rx="2" fill="#F8D35A" transform="rotate(30 46 130)"/>`,
+  salad: `<path d="M14 100 Q20 178 100 180 Q180 178 186 100 Z" fill="#8FC1E3"/><ellipse cx="100" cy="100" rx="86" ry="22" fill="#7AB0D6"/><ellipse cx="100" cy="100" rx="76" ry="17" fill="#5F95BF"/>` +
+    [[60, 92, "t"], [100, 86, "a"], [136, 94, "p"], [80, 102, "p"], [120, 104, "t"], [52, 104, "a"], [146, 104, "a"]].map(([x, y, k]) => `<g transform="translate(${x} ${y}) scale(.9)">${VEG[{ t: "tomato", a: "avocado", p: "pickle" }[k]].piece}</g>`).join("") +
+    `<path d="M88 76 Q100 64 112 76 Q100 84 88 76Z" fill="#5DA23B"/><path d="M128 80 Q140 70 152 82 Q138 88 128 80Z" fill="#7CC04E"/>`,
+  hotdog: `<g transform="translate(100 112) scale(.33) translate(-600 -640)"><path d="M340 646 Q340 584 410 578 H790 Q860 584 860 646 Z" fill="#E39A4F"/><path d="M366 634 Q600 596 834 634 Q600 656 366 634Z" fill="#F7D59A"/><g transform="translate(600 612)">${SAUSAGE("#C8553D")}${GRILL}</g><path d="M370 600 Q390 578 410 600 T450 600 T490 600 T530 600 T570 600 T610 600 T650 600 T690 600 T730 600 T770 600 T810 600" stroke="#C8231C" stroke-width="12" fill="none" stroke-linecap="round"/><path d="M340 640 Q600 684 860 640 Q866 700 790 708 H410 Q334 700 340 640Z" fill="#DE9248"/></g>`,
+  cookies: [["car", 62, 74, -10], ["bear", 136, 70, 8], ["star", 70, 140, 12], ["heart", 136, 140, -8]].map(([k, x, y, r]) => `<g transform="translate(${x} ${y}) rotate(${r}) scale(.6)"><g fill="#E3A65A" stroke="#B97A3A" stroke-width="5" stroke-linejoin="round">${COOKIE[k]}</g>${k === "bear" ? `<circle cx="-14" cy="-6" r="5" fill="#6B3B22"/><circle cx="14" cy="-6" r="5" fill="#6B3B22"/><ellipse cy="12" rx="9" ry="7" fill="#6B3B22"/>` : ""}</g>`).join(""),
+  icecream: `<path d="M68 112 L132 112 L100 192Z" fill="#E3A85A"/><path d="M78 116 L104 186 M96 114 L116 166 M122 116 L96 186 M104 114 L84 166" stroke="#C98A3A" stroke-width="3"/><circle cx="100" cy="98" r="36" fill="#F49CB8"/><circle cx="100" cy="56" r="32" fill="#8B5A3C"/><path d="M64 104 Q70 122 80 112 Q90 128 100 114 Q110 128 120 112 Q130 122 136 104Z" fill="#F49CB8"/><g transform="translate(76 4) scale(.48)">${ICON.cherry}</g><rect x="80" y="86" width="10" height="4" rx="2" fill="#F6B92B" transform="rotate(30 85 88)"/><rect x="112" y="92" width="10" height="4" rx="2" fill="#4A90D9" transform="rotate(-20 117 94)"/>`,
+};
+
+// =====================================================================
+//  ИГРОВОЙ ДВИЖОК
+// =====================================================================
+const G = { s: 1, gen: 0, loops: [], muted: false, busy: true, step: null, key: null, S: null };
+try { G.muted = localStorage.getItem("kuhnya-artema-mute") === "1"; } catch (e) {}
+
+function fit() {
+  const W = innerWidth, H = innerHeight, s = Math.min(W / 1600, H / 1000);
+  const ox = (W - 1600 * s) / 2, oy = (H - 1000 * s) / 2;
+  G.s = s;
+  stage.style.transform = `translate(${ox}px,${oy}px) scale(${s})`;
+  const split = oy + 560 * s, b = document.body.style, n = THEME_N, px = v => (v * s).toFixed(2) + "px";
+  const below = H - split;
+  if (n === "3") {
+    // светло-зелёная рамка, внутри — кремовый лист (рисует #stage::before)
+    b.backgroundImage = "none"; b.backgroundColor = "#CFE5B0";
+    return;
+  }
+  b.backgroundColor = "var(--wall)";
+  const layers = [], sizes = [], pos = [];
+  const add = (img, size, p) => { layers.push(img); sizes.push(size); pos.push(p); };
+  // вертикальные полосы сдвигаем в такт кухне, но слой растягиваем на всю ширину окна
+  const vx = (period, y, h) => { const P = period * s; return [`calc(100% + ${P}px) ${h}px`, `${(ox % P) - P}px ${y}px`]; };
+  if (n === "1") {
+    // скатерть в клетку
+    add(`linear-gradient(var(--wood-edge), var(--wood-edge))`, `100% ${px(12)}`, `0 ${split}px`);
+    add(`repeating-linear-gradient(90deg, rgba(232,120,90,.28) 0 ${px(40)}, transparent ${px(40)} ${px(80)})`, ...vx(80, split, below));
+    add(`repeating-linear-gradient(0deg, rgba(232,120,90,.28) 0 ${px(40)}, transparent ${px(40)} ${px(80)})`, `100% ${below}px`, `0 ${split}px`);
+    add(`linear-gradient(var(--wood), var(--wood))`, `100% ${below}px`, `0 ${split}px`);
+    // плитка на стене
+    add(`repeating-linear-gradient(90deg, var(--wall-line) 0 ${px(4)}, transparent ${px(4)} ${px(100)})`, ...vx(100, 0, split));
+    add(`repeating-linear-gradient(0deg, var(--wall-line) 0 ${px(4)}, transparent ${px(4)} ${px(100)})`, `100% ${split}px`, `0 ${split - 4 * s}px`);
+  } else {
+    // деревянная столешница и розовая скатерть в клетку, на стене — полоски
+    add(`linear-gradient(var(--wood-edge), var(--wood-edge))`, `100% ${px(36)}`, `0 ${split}px`);
+    add(`repeating-linear-gradient(90deg, rgba(236,110,150,.26) 0 ${px(34)}, transparent ${px(34)} ${px(68)})`, ...vx(68, split, below));
+    add(`repeating-linear-gradient(0deg, rgba(236,110,150,.26) 0 ${px(34)}, transparent ${px(34)} ${px(68)})`, `100% ${below}px`, `0 ${split}px`);
+    add(`linear-gradient(var(--wood), var(--wood))`, `100% ${below}px`, `0 ${split}px`);
+    add(`repeating-linear-gradient(90deg, var(--wall-line) 0 ${px(28)}, transparent ${px(28)} ${px(56)})`, ...vx(56, 0, split));
+  }
+  b.backgroundImage = layers.join(",");
+  b.backgroundSize = sizes.join(",");
+  b.backgroundPosition = pos.join(",");
+  b.backgroundRepeat = "no-repeat";
+}
+addEventListener("resize", fit);
+fit();
+
+// координаты кухни из координат экрана
+function toStage(cx, cy) { const r = stage.getBoundingClientRect(); return { x: (cx - r.left) / G.s, y: (cy - r.top) / G.s }; }
+function rectOf(el) {
+  const r = el.getBoundingClientRect(), st = stage.getBoundingClientRect();
+  return { x: (r.left - st.left) / G.s, y: (r.top - st.top) / G.s, w: r.width / G.s, h: r.height / G.s };
+}
+function inside(pt, el, pad = 50) {
+  if (!el) return false;
+  const r = rectOf(el);
+  return pt.x > r.x - pad && pt.x < r.x + r.w + pad && pt.y > r.y - pad && pt.y < r.y + r.h + pad;
+}
+function centerOf(el) { const r = rectOf(el); return { x: r.x + r.w / 2, y: r.y + r.h / 2 }; }
+
+function show(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("on", s.id === id));
+  G.screen = id;
+  const back = id === "game" || id === "puzzle" || id === "pmenu";
+  $("homeBtn").classList.toggle("hide", !back);
+  $("muteBtn").style.left = back ? "136px" : "24px";
+  $("musicBtn").style.left = back ? "248px" : "136px";
+}
+
+function cleanup() {
+  G.gen++;
+  G.loops.forEach(f => { try { f(); } catch (e) {} });
+  G.loops = [];
+  stopVoice(); clearHint();
+  clearInterval(hintCycle); $("hint").classList.add("off");
+  G.holding = false; G.ring = null;
+  puzzleClear();
+  $("doneBtn").classList.remove("on");
+  $("win").classList.remove("on");
+  world.innerHTML = "";
+  shelf.innerHTML = "";
+  G.confettiGen = (G.confettiGen || 0) + 1;
+  $("confetti").getContext("2d").clearRect(0, 0, 1600, 1000);
+}
+
+function startRecipe(key) {
+  cleanup();
+  show("game");
+  const R = RECIPES[key];
+  G.key = key; G.R = R; G.i = -1; G.used = new Set();
+  const S = G.S = { targets: {} };
+  setupBites(S);
+  R.build(S);
+  G.order = [...R.shelf].sort(() => Math.random() - .5);
+  $("dots").innerHTML = R.steps.map(() => `<div class="dot"></div>`).join("");
+  next();
+}
+
+function next() {
+  const R = G.R, S = G.S;
+  G.i++;
+  const st = G.step = R.steps[G.i];
+  [...$("dots").children].forEach((d, i) => { d.classList.toggle("on", i < G.i); d.classList.toggle("now", i === G.i); });
+  G.taps = 0; G.picks = 0; G.progress = 0; G.busy = false;
+  renderShelf();
+  showHint(st);
+  if (st.enter) st.enter(S);
+  if (st.kind === "auto") {
+    G.busy = true;
+    const gen = G.gen;
+    st.run(S).then(() => { if (gen === G.gen) next(); });
+    return;
+  }
+  if (st.kind === "eat" || st.kind === "drink") {
+    if (st.kind === "eat") S.targets.dish.setAttribute("mask", "url(#biteMask)");
+    say(st.say || st.kind);
+    armHint();
+    return;
+  }
+  say(st.say);
+  armHint();
+}
+
+// шаг сделан: хвалим, проигрываем, что получилось, и дальше
+async function complete(run) {
+  const gen = G.gen;
+  G.busy = true; clearHint();
+  $("doneBtn").classList.remove("on");
+  const p = praise();
+  if (run) await run();
+  if (gen !== G.gen) return;
+  await Promise.race([p, sleep(1300)]);
+  if (gen !== G.gen) return;
+  next();
+}
+
+// ---------- полка ----------
+function shelfIds() {
+  const st = G.step;
+  const ids = G.order.filter(id => !G.used.has(id));
+  if (st && st.kind === "pick") st.items.forEach(id => { if (!ids.includes(id)) ids.push(id); });
+  return ids;
+}
+function wanted(id) {
+  const st = G.step;
+  return !!st && (st.kind === "drag" && st.item === id || st.kind === "pick" && st.items.includes(id));
+}
+function renderShelf() {
+  const old = new Set([...shelf.children].map(c => c.dataset.id));
+  shelf.innerHTML = "";
+  for (const id of shelfIds()) {
+    const c = document.createElement("div");
+    const st = G.step, free = st && (st.kind === "drag" || st.kind === "pick");
+    c.className = "item" + (old.has(id) ? "" : " new") + (free || wanted(id) ? "" : " idle");
+    c.dataset.id = id;
+    c.innerHTML = iconSvg(id);
+    c.addEventListener("pointerdown", e => startDrag(e, id, c));
+    shelf.appendChild(c);
+  }
+}
+function cardOf(id) { return shelf.querySelector(`[data-id="${id}"]`); }
+
+// ---------- перетаскивание ----------
+let drag = null;
+function startDrag(e, id, card) {
+  e.preventDefault();
+  ac();
+  bumpHint();
+  if (G.busy || drag) return;
+  const pt = toStage(e.clientX, e.clientY);
+  const gh = document.createElement("div");
+  gh.className = "ghost"; gh.innerHTML = iconSvg(id);
+  stage.appendChild(gh);
+  drag = { id, card, gh, x0: e.clientX, y0: e.clientY, moved: false, pid: e.pointerId };
+  moveGhost(pt);
+  card.classList.add("taken");
+  SFX.pop();
+}
+function moveGhost(pt) { drag.gh.style.transform = `translate(${pt.x - 75}px,${pt.y - 75}px) scale(1.1)`; drag.pt = pt; }
+addEventListener("pointermove", e => {
+  if (!drag || e.pointerId !== drag.pid) return;
+  if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) > 12) drag.moved = true;
+  moveGhost(toStage(e.clientX, e.clientY));
+});
+addEventListener("pointerup", e => { if (drag && e.pointerId === drag.pid) endDrag(); endHold(); });
+addEventListener("pointercancel", e => { if (drag && e.pointerId === drag.pid) endDrag(); endHold(); });
+
+async function endDrag() {
+  const d = drag; drag = null;
+  const st = G.step, S = G.S;
+  const target = st && S.targets[st.target];
+  const ok = wanted(d.id) && !G.busy;
+  if (ok && (!d.moved || inside(d.pt, target))) {
+    // попали! (или просто нажали на нужный продукт — тогда он сам летит куда надо)
+    const c = centerOf(target);
+    const dropPt = d.moved ? d.pt : null;
+    if (st.kind === "drag") G.busy = true;
+    await d.gh.animate([{ transform: d.gh.style.transform, opacity: 1 }, { transform: `translate(${(dropPt || c).x - 75}px,${(dropPt || c).y - 75}px) scale(.4)`, opacity: 0 }], { duration: 320, easing: "ease-in" }).finished;
+    d.gh.remove();
+    if (st !== G.step) return;
+    if (st.kind === "drag") {
+      G.used.add(d.id);
+      d.card.classList.add("gone");
+      complete(() => st.run(S));
+    } else {
+      d.card.classList.remove("taken");
+      st.place(S, d.id, dropPt);
+      G.picks++;
+      bumpHint();
+      if (G.picks >= st.max) complete(null);
+      else if (G.picks === st.min) { $("doneBtn").classList.add("on"); say("done_btn"); }
+      else if (G.picks < st.min) say("more");
+    }
+    return;
+  }
+  // не туда — продукт возвращается на полку
+  const home = centerOf(d.card);
+  if (!ok && (d.moved ? inside(d.pt, target) : true) && !G.busy) {
+    say(pick(["later1", "later2", "later3"]));
+    setTimeout(() => hintWiggle(), 600);
+  } else if (ok) {
+    wiggle(target);
+  }
+  SFX.boing();
+  await d.gh.animate([{ transform: d.gh.style.transform }, { transform: `translate(${home.x - 75}px,${home.y - 75}px) scale(1)` }], { duration: 300, easing: "ease-out" }).finished;
+  d.gh.remove();
+  d.card.classList.remove("taken");
+}
+
+// ---------- нажатия на кухне ----------
+scene.addEventListener("pointerdown", e => {
+  ac();
+  bumpHint();
+  const st = G.step, S = G.S;
+  if (!st || G.busy || drag) return;
+  const pt = toStage(e.clientX, e.clientY);
+  const target = S.targets[st.target];
+  const hit = inside(pt, target, 20);
+  if (st.kind === "tap") {
+    if (!hit) { wiggle(target); return; }
+    const i = G.taps++;
+    st.onTap && st.onTap(S, i, pt);
+    if (G.taps >= st.times) { G.busy = true; const gen = G.gen; setTimeout(() => { if (gen === G.gen) complete(st.run && (() => st.run(S))); }, st.times > 1 ? 450 : 0); }
+  } else if (st.kind === "mix") {
+    if (!hit) { wiggle(target); return; }
+    startHold();
+  } else if (st.kind === "eat") {
+    if (!hit) return;
+    eatBite(pt);
+  } else if (st.kind === "drink") {
+    if (!hit) return;
+    sip();
+  } else if (st.kind === "drag" || st.kind === "pick") {
+    if (hit) hintWiggle();
+  }
+});
+
+// ---------- «нажми и держи» ----------
+function startHold() {
+  const st = G.step, S = G.S;
+  if (G.holding) return;
+  G.holding = true;
+  G.progress = Math.min(1, G.progress + .05);
+  if (!G.ring) {
+    const r = rectOf(S.targets[st.target]);
+    G.ring = G_(world, `<circle r="40" fill="#FFF8EF"/><circle r="30" fill="none" stroke="#F3E3D0" stroke-width="12"/>`, { transform: `translate(${r.x + r.w + 10} ${r.y + 40})` });
+    G.ringFg = S_("circle", { r: 30, fill: "none", stroke: "#3E9B4F", "stroke-width": 12, "stroke-linecap": "round", "stroke-dasharray": 188.5, "stroke-dashoffset": 188.5, transform: "rotate(-90)" }, G.ring);
+  }
+  G.motorStop = st.motor ? loopMotor(st.motor) : stirSound();
+  (S[st.shake] || S.targets[st.target]).classList.add("shake");
+  st.start && st.start(S);
+  let last = performance.now();
+  const gen = G.gen;
+  (function loop(now) {
+    if (gen !== G.gen || !G.holding) return;
+    G.progress = Math.min(1, G.progress + (now - last) / st.ms);
+    last = now;
+    st.progress && st.progress(S, G.progress);
+    if (S.swirl) S.swirl.style.transform = `rotate(${now / 2.5}deg)`;
+    G.ringFg.setAttribute("stroke-dashoffset", (188.5 * (1 - G.progress)).toFixed(1));
+    if (G.progress >= 1) { endHold(); G.ring.remove(); G.ring = null; complete(() => st.run(S)); return; }
+    requestAnimationFrame(loop);
+  })(last);
+}
+function endHold() {
+  if (!G.holding) return;
+  G.holding = false;
+  const st = G.step, S = G.S;
+  G.motorStop && G.motorStop(); G.motorStop = null;
+  const el = S[st.shake] || S.targets[st.target];
+  el && el.classList.remove("shake");
+  st.stop && st.stop(S);
+}
+// звук венчика — стучит по миске
+function stirSound() {
+  const t = setInterval(() => { noise(.05, .12, "bandpass", 2500, null, 0, 3); tone(1200, 900, .03, "sine", .05); }, 160);
+  const stop = () => clearInterval(t);
+  G.loops.push(stop); return stop;
+}
+
+// ---------- кушаем ----------
+function eatBite(pt) {
+  const S = G.S, st = G.step;
+  bite(S, pt.x, pt.y);
+  SFX.nom();
+  G.taps++;
+  if (G.taps % 3 === 0 && G.taps < st.bites) say(pick(["yum1", "yum2", "yum3"]));
+  if (G.taps >= st.bites) {
+    G.busy = true;
+    fadeOut(S.targets.dish, 500).then(() => win());
+  }
+}
+function sip() {
+  const S = G.S, st = G.step;
+  G.taps++;
+  if (st.drain) {
+    SFX.nom();
+    st.drain(S, G.taps / st.sips);
+    if (G.taps % 3 === 0 && G.taps < st.sips) say(pick(["yum1", "yum2", "yum3"]));
+    if (G.taps >= st.sips) { G.busy = true; setTimeout(() => win(), 600); }
+    return;
+  }
+  SFX.slurp();
+  const h0 = +S.drinkR.getAttribute("height"), h1 = 300 * (1 - G.taps / st.sips);
+  tween(400, t => { const h = h0 + (h1 - h0) * t; S.drinkR.setAttribute("y", 716 - h); S.drinkR.setAttribute("height", h); });
+  if (G.taps % 3 === 0 && G.taps < st.sips) say(pick(["yum1", "yum3"]));
+  if (G.taps >= st.sips) { G.busy = true; setTimeout(() => win(), 600); }
+}
+
+// ---------- кнопка-галочка ----------
+$("doneBtn").addEventListener("click", () => {
+  if (G.step && G.step.kind === "pick" && G.picks >= G.step.min && !G.busy) complete(null);
+});
+
+// ---------- подсказки, если долго ничего не происходит ----------
+let hintT = null;
+function clearHint() { clearTimeout(hintT); hintT = null; }
+function armHint(ms = 9000) {
+  clearHint();
+  const gen = G.gen, i = G.i;
+  hintT = setTimeout(() => {
+    if (gen !== G.gen || i !== G.i || G.busy || G.holding) return;
+    const st = G.step;
+    say(st.say || st.kind);
+    hintWiggle();
+    armHint(14000);
+  }, ms);
+}
+function bumpHint() { if (hintT) armHint(); }
+// что нарисовать в кружке: продукт, инструмент или «кушай»
+let hintCycle = null;
+function hintIds(st) {
+  if (st.kind === "drag") return [st.item];
+  if (st.kind === "pick") return st.items;
+  if (st.kind === "eat") return ["eat"];
+  if (st.kind === "drink") return [st.hint || "glass"];
+  if (st.kind === "tap" || st.kind === "mix") return [st.hint || { oven: "oven", pan: "pan", bowl: "bowl", blender: "blender", cake: "blow", stove: "stove", pot: "pot" }[st.target]];
+  return [];
+}
+function setHint(id) {
+  const w = NAME[id] || "";
+  $("hintCircle").innerHTML = iconSvg(id);
+  $("hintWord").textContent = w;
+  $("hintWord").classList.toggle("long", w.length > 8);
+  const h = $("hint"); h.classList.remove("change"); void h.offsetWidth; h.classList.add("change");
+}
+function showHint(st) {
+  clearInterval(hintCycle);
+  const ids = hintIds(st).filter(Boolean);
+  $("hint").classList.toggle("off", !ids.length);
+  if (!ids.length) return;
+  let k = 0;
+  setHint(ids[0]);
+  if (ids.length > 1) hintCycle = setInterval(() => setHint(ids[++k % ids.length]), 1600);
+}
+function hintWiggle() {
+  const st = G.step, S = G.S;
+  if (!st) return;
+  wiggle($("hintCircle"));
+  if (st.kind === "drag") wiggle(cardOf(st.item));
+  else if (st.kind === "pick") st.items.forEach(id => wiggle(cardOf(id)));
+  else wiggle(S.targets[st.target]);
+}
+
+// ---------- победа ----------
+function countDone(store, key) {
+  const done = readDone(store);
+  done[key] = (done[key] || 0) + 1;
+  try { localStorage.setItem(store, JSON.stringify(done)); } catch (e) {}
+}
+function readDone(store) {
+  try { return JSON.parse(localStorage.getItem(store) || "{}"); } catch (e) { return {}; }
+}
+function win(isPuzzle) {
+  const gen = G.gen;
+  G.mode = isPuzzle ? "puzzle" : "cook";
+  if (!isPuzzle) $("dots").querySelectorAll(".dot").forEach(d => { d.classList.add("on"); d.classList.remove("now"); });
+  $("hint").classList.add("off");
+  SFX.fanfare();
+  confetti();
+  countDone(isPuzzle ? "kuhnya-artema-puz" : "kuhnya-artema-done", G.key);
+  $("winStars").innerHTML = [0, 1, 2].map(() => STAR).join("");
+  $("winPic").innerHTML = CHEF_IMG ? `<img src="${CHEF_IMG}" alt="">` : `<svg viewBox="0 0 200 200">${DISH_ICON[G.key] || DISH_ICON.pizza}</svg>`;
+  $("winTitle").textContent = isPuzzle ? "Ура!" : "Вкусно!";
+  $("winText").textContent = isPuzzle ? "Пазл собран!" : "Ты настоящий повар!";
+  $("win").classList.add("on");
+  if (!isPuzzle) setTimeout(() => { if (gen === G.gen) say(pick(["win1", "win2"])); }, 700);
+}
+$("againBtn").addEventListener("click", () => G.mode === "puzzle" ? startPuzzle(G.key) : startRecipe(G.key));
+$("menuBtn").addEventListener("click", () => G.mode === "puzzle" ? openPuzzles() : openMenu());
+$("homeBtn").addEventListener("click", () => G.screen === "puzzle" ? openPuzzles() : openMenu());
+
+function confetti() {
+  const cv = $("confetti"), cx = cv.getContext("2d");
+  const cols = ["#E4513A", "#3E9B4F", "#F6B92B", "#4A90D9", "#F49CB8", "#9C5BD0"];
+  const P = Array.from({ length: 160 }, () => ({ x: rnd(200, 1400), y: rnd(-300, -20), vx: rnd(-3, 3), vy: rnd(4, 9), r: rnd(0, 6), vr: rnd(-.2, .2), w: rnd(14, 24), h: rnd(8, 14), c: pick(cols) }));
+  const t0 = performance.now(), cg = G.confettiGen;
+  (function f(now) {
+    if (cg !== G.confettiGen) return;
+    cx.clearRect(0, 0, 1600, 1000);
+    for (const p of P) {
+      p.x += p.vx; p.y += p.vy; p.vy += .08; p.r += p.vr;
+      cx.save(); cx.translate(p.x, p.y); cx.rotate(p.r); cx.fillStyle = p.c; cx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); cx.restore();
+    }
+    if (now - t0 < 3500) requestAnimationFrame(f); else cx.clearRect(0, 0, 1600, 1000);
+  })(t0);
+}
+
+// =====================================================================
+//  МЕНЮ
+// =====================================================================
+const STAR = `<svg viewBox="0 0 100 100"><path d="M50 6 L62 36 L94 38 L69 58 L78 90 L50 72 L22 90 L31 58 L6 38 L38 36Z" fill="#F6B92B" stroke="#F6B92B" stroke-width="8" stroke-linejoin="round"/></svg>`;
+const DISH_ICON = {
+  pizza: `<circle cx="100" cy="104" r="88" fill="#D48E45"/><circle cx="100" cy="100" r="88" fill="#E6B772"/><circle cx="100" cy="100" r="72" fill="#D9432E"/><circle cx="100" cy="100" r="66" fill="#F6C343"/>` +
+    [[70, 70], [128, 66], [140, 116], [96, 140], [58, 118], [100, 98]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="15" fill="#C8362F"/><circle cx="${x - 4}" cy="${y - 4}" r="2.5" fill="#F5B8A8"/><circle cx="${x + 5}" cy="${y + 3}" r="2.5" fill="#F5B8A8"/>`).join("") +
+    [0, 60, 120].map(a => `<line x1="${100 - 72 * Math.cos(a * Math.PI / 180)}" y1="${100 - 72 * Math.sin(a * Math.PI / 180)}" x2="${100 + 72 * Math.cos(a * Math.PI / 180)}" y2="${100 + 72 * Math.sin(a * Math.PI / 180)}" stroke="#D48E45" stroke-width="4" opacity=".6"/>`).join(""),
+  burger: (() => { let y = 182, s = ""; for (const k of ["bunB", "lettuce", "patty", "cheese", "tomato", "bunT"]) { s += `<g transform="translate(100 ${y}) scale(.43)">${LAYER[k].html}</g>`; y -= LAYER[k].h * .43; } return s; })(),
+  cake: `<ellipse cx="100" cy="176" rx="90" ry="18" fill="#F7F3EC"/><ellipse cx="100" cy="164" rx="76" ry="19" fill="#D9954A"/><rect x="24" y="104" width="152" height="60" fill="#E5A85A"/><path d="M24 132 Q100 152 176 132 v7 Q100 158 24 139z" fill="#FBE3EA"/><ellipse cx="100" cy="104" rx="78" ry="20" fill="#F8C4D2"/>` +
+    [-56, -20, 20, 56].map(x => `<rect x="${100 + x - 6}" y="${104 + 18 * Math.sqrt(1 - (x / 78) ** 2) - 4}" width="12" height="${16 + Math.abs(x) % 12}" rx="6" fill="#F8C4D2"/>`).join("") +
+    `<g transform="translate(64 66) scale(.36)">${ICON.strawberry}</g><g transform="translate(104 70) scale(.32)">${ICON.strawberry}</g><rect x="94" y="52" width="12" height="44" rx="4" fill="#6EC1E4"/><path d="M100 26c8 9 9 16 0 24c-9-8-8-15 0-24z" fill="#FF9F1C"/><path d="M100 36c4 4 4 8 0 11c-4-3-4-7 0-11z" fill="#FFE27A"/>`,
+  pancakes: `<ellipse cx="100" cy="174" rx="92" ry="20" fill="#F7F3EC"/>` + [0, 1, 2, 3].map(i => `<ellipse cx="100" cy="${164 - i * 16}" rx="70" ry="19" fill="#C98A3A"/><ellipse cx="100" cy="${160 - i * 16}" rx="69" ry="18" fill="#E9B45E"/>`).join("") +
+    `<path d="M50 112 C50 100 80 96 100 98 C130 96 152 104 150 114 C148 122 140 124 138 132 C136 140 130 140 128 130 C120 124 80 126 70 124 C66 132 58 134 58 124 C52 122 50 118 50 112Z" fill="#F2A93B" opacity=".92"/><g transform="translate(78 56) scale(.42)">${ICON.strawberry}</g>`,
+  smoothie: `<path d="M50 54 L150 54 L138 188 L62 188 Z" fill="#E3F2F8"/><path d="M56 80 L144 80 L136 182 L64 182 Z" fill="#F0A0A8"/><path d="M60 64 L68 176" stroke="#fff" stroke-width="7" stroke-linecap="round" opacity=".6"/><path d="M110 170 L122 30 L150 16" stroke="#E4513A" stroke-width="11" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M110 170 L122 30 L150 16" stroke="#FFF8EF" stroke-width="11" fill="none" stroke-dasharray="7 9" stroke-linejoin="round"/><g transform="translate(30 30) scale(.5)">${ICON.orange}</g>`,
+};
+Object.assign(DISH_ICON, NEW_DISH_ICON);
+const CHEF_HAT = `<svg viewBox="0 0 400 300"><ellipse cx="200" cy="286" rx="150" ry="10" fill="#E8C9A8"/>
+  <path d="M110 176 C60 176 50 100 100 92 C100 40 170 26 196 64 C220 20 300 30 300 92 C350 96 344 176 290 176 Z" fill="#FFFFFF"/>
+  <rect x="116" y="170" width="168" height="90" rx="18" fill="#FFFFFF"/><rect x="116" y="196" width="168" height="16" fill="#F1E6DA"/>
+  <path d="M150 120 Q160 150 156 170 M200 100 Q206 140 200 170 M250 120 Q244 150 246 170" stroke="#F1E6DA" stroke-width="8" fill="none" stroke-linecap="round"/></svg>`;
+// картинка «Артём-повар»: положи файл в img/артём-повар.png — появится на первом экране и на экране победы
+let CHEF_IMG = null;
+(function () {
+  const im = new Image();
+  im.onload = () => { CHEF_IMG = im.src; $("chefPic").innerHTML = `<img src="${im.src}" alt="Артём-повар">`; };
+  im.onerror = () => { $("chefPic").innerHTML = CHEF_HAT; };
+  im.src = "img/артём-повар.png";
+})();
+
+function openMenu(first) {
+  cleanup();
+  show("menu");
+  const done = readDone("kuhnya-artema-done");
+  $("dishes").innerHTML = Object.keys(RECIPES).map(k => `
+    <button class="dish-card" data-k="${k}" aria-label="${RECIPES[k].title}">
+      <svg viewBox="0 0 200 200">${DISH_ICON[k]}</svg>
+      <span class="name">${RECIPES[k].title}</span>
+      <span class="stars">${STAR.repeat(Math.min(5, done[k] || 0))}</span>
+    </button>`).join("") + `
+    <button class="dish-card puz" id="toPuzzles" aria-label="Пазлы">
+      <svg viewBox="0 0 200 200">${PUZZLE_ICON}</svg>
+      <span class="name">Пазлы</span>
+      <span class="stars"></span>
+    </button>`;
+  $("toPuzzles").addEventListener("click", () => { SFX.pop(); openPuzzles(); say("puzzles"); });
+  $("dishes").querySelectorAll(".dish-card[data-k]").forEach(b => b.addEventListener("click", async () => {
+    const k = b.dataset.k;
+    SFX.pop();
+    startRecipe(k);
+    // название блюда звучит перед первой подсказкой
+    const gen = G.gen; G.busy = true; clearHint();
+    await say("d_" + k);
+    if (gen === G.gen) { G.busy = false; say(G.step.say); armHint(); }
+  }));
+  say(first ? "hello" : "menu");
+}
+
+$("play").addEventListener("click", () => {
+  ac();
+  musicStart();
+  try { if (matchMedia("(pointer: coarse)").matches && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {}); } catch (e) {}
+  openMenu(true);
+});
+function paintMute() { $("muteBtn").classList.toggle("off", G.muted); }
+$("muteBtn").addEventListener("click", () => {
+  G.muted = !G.muted;
+  try { localStorage.setItem("kuhnya-artema-mute", G.muted ? "1" : "0"); } catch (e) {}
+  if (G.muted) { stopVoice(); G.loops.forEach(f => { try { f(); } catch (e) {} }); G.loops = []; }
+  paintMute();
+});
+paintMute();
+
+// =====================================================================
+//  ФОНОВАЯ МУЗЫКА — спокойная мелодия-маримба, синтезируется
+// =====================================================================
+const MUSIC = { on: true, timer: null, gain: null, t: 0, i: 0 };
+try { MUSIC.on = localStorage.getItem("kuhnya-artema-music") !== "0"; } catch (e) {}
+const NOTE = n => {
+  const m = /^([A-G])(\d)$/.exec(n);
+  const k = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[m[1]];
+  return 440 * Math.pow(2, (k - 9) / 12 + (+m[2] - 4));
+};
+// 8 тактов по 8 восьмушек, «-» — пауза
+const TUNE = [
+  "E5 - G5 - A5 G5 E5 -", "D5 - G5 - B4 - D5 -", "C5 - E5 - A5 - G5 E5", "F5 - A5 - G5 - - -",
+  "E5 G5 C6 - B5 A5 G5 -", "D5 - B4 - D5 G5 - -", "A5 - G5 F5 E5 - D5 -", "C5 - E5 - C5 - - -",
+].join(" ").split(" ");
+const BASS = ["C3", "G2", "A2", "F2", "C3", "G2", "F2", "C3"];
+const CHORD = { C3: ["C4", "E4", "G4"], G2: ["B3", "D4", "G4"], A2: ["A3", "C4", "E4"], F2: ["A3", "C4", "F4"] };
+const EIGHTH = .3;
+function mNote(f, t, vol, dur, type = "sine") {
+  const o = AC.createOscillator(), g = AC.createGain();
+  o.type = type; o.frequency.value = f;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t + .01);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(MUSIC.gain); o.start(t); o.stop(t + dur + .05);
+}
+function musicTick() {
+  if (!MUSIC.gain) return;
+  while (MUSIC.t < AC.currentTime + .5) {
+    const i = MUSIC.i % TUNE.length, bar = Math.floor(i / 8), slot = i % 8, t = MUSIC.t;
+    if (TUNE[i] !== "-") { mNote(NOTE(TUNE[i]), t, .16, .55); mNote(NOTE(TUNE[i]) * 4, t, .025, .12); }
+    if (slot === 0 || slot === 4) mNote(NOTE(BASS[bar]), t, .2, .5, "triangle");
+    if (slot === 2 || slot === 6) CHORD[BASS[bar]].forEach(c => mNote(NOTE(c), t, .045, .35));
+    MUSIC.t += EIGHTH; MUSIC.i++;
+  }
+}
+function musicStart() {
+  if (!MUSIC.on || G.muted || MUSIC.timer) return;
+  const a = ac();
+  MUSIC.gain = a.createGain(); MUSIC.gain.gain.value = .5; MUSIC.gain.connect(a.destination);
+  MUSIC.t = a.currentTime + .15; MUSIC.i = 0;
+  MUSIC.timer = setInterval(musicTick, 150);
+  musicTick();
+}
+function musicStop() {
+  clearInterval(MUSIC.timer); MUSIC.timer = null;
+  if (MUSIC.gain) { const g = MUSIC.gain; g.gain.setTargetAtTime(0, AC.currentTime, .1); setTimeout(() => g.disconnect(), 800); MUSIC.gain = null; }
+}
+// пока говорит голос, музыка тише
+function duck(on) { if (MUSIC.gain) MUSIC.gain.gain.setTargetAtTime(on ? .2 : .5, AC.currentTime, .2); }
+function paintMusic() { $("musicBtn").classList.toggle("off", !MUSIC.on); }
+$("musicBtn").addEventListener("click", () => {
+  MUSIC.on = !MUSIC.on;
+  try { localStorage.setItem("kuhnya-artema-music", MUSIC.on ? "1" : "0"); } catch (e) {}
+  MUSIC.on ? musicStart() : musicStop();
+  paintMusic();
+});
+$("muteBtn").addEventListener("click", () => G.muted ? musicStop() : musicStart());
+paintMusic();
+// телефон свернули — звук не играет в кармане
+document.addEventListener("visibilitychange", () => { if (AC) document.hidden ? AC.suspend() : AC.resume(); });
+
+// =====================================================================
+//  ПАЗЛЫ из 12 деталей (4 × 3) — как пазл с машинкой
+// =====================================================================
+const PZ = { COLS: 4, ROWS: 3, S: 170, M: 46, BX: 460, BY: 200, Q: 2, SNAP: 55 };
+PZ.BW = PZ.COLS * PZ.S; PZ.BH = PZ.ROWS * PZ.S;
+const PUZZLE_ICON = `
+  <rect x="20" y="20" width="76" height="76" rx="12" fill="#F6B92B"/><rect x="104" y="20" width="76" height="76" rx="12" fill="#3E9B4F"/>
+  <rect x="20" y="104" width="76" height="76" rx="12" fill="#4A90D9"/><rect x="104" y="104" width="76" height="76" rx="12" fill="#FFF8EF"/>
+  <circle cx="100" cy="58" r="17" fill="#F6B92B"/><circle cx="142" cy="100" r="17" fill="#3E9B4F"/>
+  <circle cx="58" cy="100" r="17" fill="#4A90D9"/><circle cx="100" cy="142" r="17" fill="#FFF8EF"/>`;
+// картинки для пазлов собраны из той же нарисованной еды
+const gIcon = (id, x, y, k = 1, r = 0) => `<g transform="translate(${x} ${y}) rotate(${r}) scale(${k}) translate(-50 -50)">${ICON[id]}</g>`;
+const gDish = (id, x, y, k) => `<g transform="translate(${x} ${y}) scale(${k}) translate(-100 -100)">${DISH_ICON[id]}</g>`;
+const checks = (c1, c2, step = 60) => {
+  let s = `<rect width="680" height="510" fill="${c1}"/>`;
+  for (let x = 0; x < 680; x += step * 2) s += `<rect x="${x}" width="${step}" height="510" fill="${c2}" opacity=".35"/>`;
+  for (let y = 0; y < 510; y += step * 2) s += `<rect y="${y}" width="680" height="${step}" fill="${c2}" opacity=".35"/>`;
+  return s;
+};
+const rays = (cx, cy, c) => {
+  let s = "";
+  for (let i = 0; i < 12; i++) {
+    const a = i * Math.PI / 6;
+    s += `<path d="M${cx} ${cy} L${(cx + 700 * Math.cos(a - .13)).toFixed(0)} ${(cy + 700 * Math.sin(a - .13)).toFixed(0)} L${(cx + 700 * Math.cos(a + .13)).toFixed(0)} ${(cy + 700 * Math.sin(a + .13)).toFixed(0)}Z" fill="${c}"/>`;
+  }
+  return s;
+};
+const balloon = (x, y, c) => `<path d="M${x} ${y + 52} q-6 40 6 80" stroke="#8A7A6A" stroke-width="3" fill="none"/><ellipse cx="${x}" cy="${y}" rx="38" ry="48" fill="${c}"/><ellipse cx="${x - 12}" cy="${y - 18}" rx="9" ry="14" fill="#fff" opacity=".45"/><path d="M${x - 6} ${y + 46} h12 l-6 10z" fill="${c}"/>`;
+const PUZZLES = {
+  pizza: { word: "ПИЦЦА", say: "puz_pizza", svg: () => checks("#FFF3E6", "#F28B74") + gDish("pizza", 340, 255, 2.2) + gIcon("tomato", 70, 80, 1.1, -15) + gIcon("cheese", 610, 80, 1.1, 10) + gIcon("mushroom", 70, 440, 1.1, 10) + gIcon("salami", 610, 440, 1.1) },
+  burger: { word: "БУРГЕР", say: "puz_burger", svg: () => `<rect width="680" height="510" fill="#8FD0F0"/>` + rays(340, 255, "#B5E2F7") + gDish("burger", 340, 250, 2.3) + gIcon("ketchup", 80, 400, 1.2, -10) + gIcon("pickle", 600, 410, 1.2) + gIcon("tomato", 600, 90, 1) + gIcon("lettuce", 80, 90, 1.1) },
+  cake: { word: "ТОРТИК", say: "puz_cake", svg: () => `<rect width="680" height="510" fill="#FCE4EC"/>` + [[60, 50, 18], [150, 420, 14], [520, 470, 16], [300, 40, 10], [450, 70, 14]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#F8BBD0"/>`).join("") + balloon(90, 130, "#6EC1E4") + balloon(590, 110, "#F7CF45") + balloon(600, 290, "#E4513A") + gDish("cake", 340, 280, 2.2) },
+  pancakes: { word: "БЛИНЧИКИ", say: "puz_pancakes", svg: () => checks("#FFF6D8", "#F6D46E", 50) + gDish("pancakes", 340, 260, 2.3) + gIcon("honey", 80, 100, 1.2, -8) + gIcon("strawberry", 600, 100, 1.1, 12) + gIcon("blueberry", 600, 420, 1.1) + gIcon("jam", 80, 420, 1.1) },
+  smoothie: { word: "КОКТЕЙЛЬ", say: "puz_smoothie", svg: () => `<rect width="680" height="510" fill="#D9F0E8"/>` + rays(340, 255, "#EAF7F2") + gDish("smoothie", 340, 250, 2.3) + gIcon("banana", 90, 110, 1.3, -10) + gIcon("strawberry", 590, 100, 1.2, 10) + gIcon("kiwi", 90, 410, 1.2) + gIcon("orange", 590, 410, 1.2) },
+  chef: { word: "АРТЁМ", say: "puz_chef", chef: true, svg: () => `<rect width="680" height="510" fill="#FFE0B2"/>` + rays(340, 255, "#FFECCF") + gDish("cake", 570, 140, .95) + gDish("burger", 110, 140, .9) + gDish("smoothie", 570, 390, .9) + gDish("pancakes", 110, 400, .9) },
+};
+const PIC = {};
+function picCanvas(key) {
+  if (PIC[key]) return PIC[key];
+  return PIC[key] = new Promise(res => {
+    const P = PUZZLES[key], W = PZ.BW * PZ.Q, H = PZ.BH * PZ.Q;
+    const c = document.createElement("canvas"); c.width = W; c.height = H;
+    const cx = c.getContext("2d");
+    const img = new Image();
+    img.onload = () => {
+      cx.drawImage(img, 0, 0, W, H);
+      if (!P.chef) return res(c);
+      // фото Артёма-повара поверх фона
+      const ch = new Image();
+      ch.onload = () => { const h = 490 * PZ.Q, w = ch.width * h / ch.height; cx.drawImage(ch, (W - w) / 2, 14 * PZ.Q, w, h); res(c); };
+      ch.onerror = () => res(c);
+      ch.src = "img/артём-повар.png";
+    };
+    img.onerror = () => res(c);
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 680 510">${P.svg()}</svg>`);
+  });
+}
+
+// ---------- форма деталей ----------
+function pzEdge(p, x0, y0, x1, y1, s) {
+  if (!s) { p.lineTo(x1, y1); return; }
+  const dx = x1 - x0, dy = y1 - y0, nx = -dy, ny = dx, out = -s;
+  const P = (t, h) => [x0 + dx * t + nx * h * out, y0 + dy * t + ny * h * out];
+  p.lineTo(...P(0.36, 0));
+  p.bezierCurveTo(...P(0.42, 0), ...P(0.43, 0.06), ...P(0.39, 0.12));
+  p.bezierCurveTo(...P(0.33, 0.22), ...P(0.45, 0.26), ...P(0.50, 0.26));
+  p.bezierCurveTo(...P(0.55, 0.26), ...P(0.67, 0.22), ...P(0.61, 0.12));
+  p.bezierCurveTo(...P(0.57, 0.06), ...P(0.58, 0), ...P(0.64, 0));
+  p.lineTo(x1, y1);
+}
+function pzEdges() {
+  const r = () => (Math.random() < .5 ? 1 : -1), h = [], v = [];
+  for (let i = 0; i < PZ.ROWS - 1; i++) h.push(Array.from({ length: PZ.COLS }, r));
+  for (let i = 0; i < PZ.ROWS; i++) v.push(Array.from({ length: PZ.COLS - 1 }, r));
+  return { h, v };
+}
+function pzPath(r, c, E) {
+  const S = PZ.S;
+  const top = r === 0 ? 0 : -E.h[r - 1][c];
+  const right = c === PZ.COLS - 1 ? 0 : E.v[r][c];
+  const bottom = r === PZ.ROWS - 1 ? 0 : E.h[r][c];
+  const left = c === 0 ? 0 : -E.v[r][c - 1];
+  const p = new Path2D();
+  p.moveTo(0, 0);
+  pzEdge(p, 0, 0, S, 0, top); pzEdge(p, S, 0, S, S, right); pzEdge(p, S, S, 0, S, bottom); pzEdge(p, 0, S, 0, 0, left);
+  p.closePath();
+  return p;
+}
+function pzRender(p, pic) {
+  const { S, M, Q, BW, BH } = PZ, W = S + 2 * M;
+  const cv = document.createElement("canvas");
+  cv.width = W * Q; cv.height = W * Q; cv.style.width = W + "px"; cv.style.height = W + "px";
+  cv.className = "piece";
+  const ctx = cv.getContext("2d");
+  ctx.scale(Q, Q); ctx.translate(M, M);
+  ctx.save(); ctx.clip(p.path);
+  ctx.drawImage(pic, -p.c * S, -p.r * S, BW, BH);
+  ctx.lineJoin = "round";
+  ctx.save(); ctx.translate(2.5, 2.5); ctx.lineWidth = 4; ctx.strokeStyle = "rgba(255,255,255,.55)"; ctx.stroke(p.path); ctx.restore();
+  ctx.save(); ctx.translate(-2.5, -2.5); ctx.lineWidth = 4; ctx.strokeStyle = "rgba(40,20,5,.35)"; ctx.stroke(p.path); ctx.restore();
+  ctx.restore();
+  ctx.lineWidth = 1.2; ctx.strokeStyle = "rgba(60,30,8,.6)"; ctx.stroke(p.path);
+  return cv;
+}
+
+// ---------- игра ----------
+const PZS = { pieces: [], drag: null, busy: true, z: 100 };
+const pzHit = document.createElement("canvas").getContext("2d");
+function puzzleClear() {
+  PZS.pieces.forEach(p => p.el.remove());
+  PZS.pieces = []; PZS.drag = null; PZS.busy = true;
+}
+function pzSet(p, x, y) { p.x = x; p.y = y; p.el.style.transform = `translate(${x}px, ${y}px)`; }
+function pzDots() {
+  const done = PZS.pieces.filter(p => p.placed).length;
+  $("pdots").innerHTML = PZS.pieces.map((_, i) => `<div class="dot${i < done ? " on" : ""}"></div>`).join("");
+  return done;
+}
+async function startPuzzle(key) {
+  cleanup();
+  show("puzzle");
+  G.key = key; G.mode = "puzzle";
+  const gen = G.gen;
+  const pic = await picCanvas(key);
+  if (gen !== G.gen) return;
+  const { S, M, Q, BX, BY, ROWS, COLS } = PZ;
+  for (const id of ["pghost", "plines", "pfull"]) { const cv = $(id); cv.width = PZ.BW * Q; cv.height = PZ.BH * Q; }
+  $("pghost").getContext("2d").drawImage(pic, 0, 0);
+  $("pfull").getContext("2d").drawImage(pic, 0, 0);
+  $("pboard").classList.remove("done");
+  $("pword").classList.remove("on");
+  $("pword").textContent = PUZZLES[key].word;
+  const E = pzEdges();
+  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+    const p = { r, c, placed: false, path: pzPath(r, c, E) };
+    p.tx = BX + c * S - M; p.ty = BY + r * S - M;
+    p.el = pzRender(p, pic);
+    p.el.style.zIndex = ++PZS.z;
+    $("puzzle").appendChild(p.el);
+    pzSet(p, p.tx, p.ty);
+    PZS.pieces.push(p);
+  }
+  const lines = $("plines").getContext("2d");
+  lines.lineWidth = 2.5; lines.strokeStyle = "rgba(60,30,8,.55)"; lines.lineJoin = "round";
+  for (const p of PZS.pieces) { lines.setTransform(Q, 0, 0, Q, p.c * S * Q, p.r * S * Q); lines.stroke(p.path); }
+  pzDots();
+  say("puz_start");
+  // сначала целая картинка, потом детали разлетаются по бокам
+  setTimeout(() => {
+    if (gen !== G.gen) return;
+    const slots = [];
+    for (const cx of [125, 325, 1275, 1475]) for (const cy of [260, 530, 800]) slots.push([cx - S / 2 - M + rnd(-15, 15), cy - S / 2 - M + rnd(-15, 15)]);
+    slots.sort(() => Math.random() - .5);
+    PZS.pieces.forEach((p, i) => { p.el.classList.add("fly"); setTimeout(() => pzSet(p, slots[i][0], slots[i][1]), i * 45); });
+    SFX.whoosh();
+    setTimeout(() => { if (gen !== G.gen) return; PZS.pieces.forEach(p => p.el.classList.remove("fly")); PZS.busy = false; }, 1350);
+  }, 1400);
+}
+function pzFind(pt) {
+  const { M } = PZ;
+  return PZS.pieces.filter(p => !p.placed).sort((a, b) => b.el.style.zIndex - a.el.style.zIndex)
+    .find(p => pzHit.isPointInPath(p.path, pt.x - p.x - M, pt.y - p.y - M));
+}
+$("puzzle").addEventListener("pointerdown", e => {
+  ac();
+  if (PZS.busy) return;
+  const pt = toStage(e.clientX, e.clientY), p = pzFind(pt);
+  if (!p) return;
+  e.preventDefault();
+  PZS.drag = { p, ox: pt.x - p.x, oy: pt.y - p.y };
+  p.el.style.zIndex = ++PZS.z;
+  p.el.classList.add("lift");
+  try { $("puzzle").setPointerCapture(e.pointerId); } catch (err) {}
+  SFX.pop();
+});
+$("puzzle").addEventListener("pointermove", e => {
+  const d = PZS.drag; if (!d) return;
+  const pt = toStage(e.clientX, e.clientY), { S, M } = PZ;
+  pzSet(d.p, Math.max(-M, Math.min(1600 - S - M, pt.x - d.ox)), Math.max(-M, Math.min(1000 - S - M, pt.y - d.oy)));
+});
+function pzDrop() {
+  const d = PZS.drag; if (!d) return;
+  PZS.drag = null;
+  const p = d.p;
+  p.el.classList.remove("lift");
+  if (Math.hypot(p.x - p.tx, p.y - p.ty) < PZ.SNAP) {
+    p.placed = true;
+    p.el.classList.add("snap", "placed");
+    p.el.style.zIndex = 10;
+    pzSet(p, p.tx, p.ty);
+    setTimeout(() => p.el.classList.remove("snap"), 200);
+    tone(660, 660, .1, "sine", .2); tone(990, 990, .16, "sine", .16, .08);
+    if (pzDots() === PZS.pieces.length) pzFinish();
+  } else SFX.boing();
+}
+$("puzzle").addEventListener("pointerup", pzDrop);
+$("puzzle").addEventListener("pointercancel", pzDrop);
+async function pzFinish() {
+  PZS.busy = true;
+  const gen = G.gen;
+  await sleep(350);
+  $("pboard").classList.add("done");
+  $("pword").classList.add("on");
+  SFX.sparkle();
+  await say("puz_done");
+  if (gen !== G.gen) return;
+  await say(PUZZLES[G.key].say);
+  if (gen !== G.gen) return;
+  await sleep(500);
+  if (gen === G.gen) win(true);
+}
+
+function openPuzzles() {
+  cleanup();
+  show("pmenu");
+  const done = readDone("kuhnya-artema-puz");
+  $("pics").innerHTML = Object.keys(PUZZLES).map(k => `
+    <button class="pic-card" data-k="${k}" aria-label="${PUZZLES[k].word}">
+      <span class="thumb"><canvas width="${PZ.BW}" height="${PZ.BH}"></canvas></span>
+      <span class="stars">${STAR.repeat(Math.min(5, done[k] || 0))}</span>
+    </button>`).join("");
+  $("pics").querySelectorAll(".pic-card").forEach(b => {
+    const k = b.dataset.k;
+    picCanvas(k).then(c => b.querySelector("canvas").getContext("2d").drawImage(c, 0, 0, PZ.BW, PZ.BH));
+    b.addEventListener("click", () => { SFX.pop(); startPuzzle(k); });
+  });
+}
+
+show("start");
+
+// установка на телефон и работа без интернета
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
+</body>
+</html>
