@@ -1,6 +1,8 @@
 // Работа без интернета: игра, картинки, шрифт и озвучка сохраняются в телефоне.
 // Страница и фразы берутся из интернета, если он есть, — так правки приходят сами.
-const CACHE = "kuhnya-v6";   // после новых картинок или переозвучки — увеличить номер
+// Игра лежит по двум адресам (/kuhnya/ и /kuhnya-artema/) на одном сайте — у каждого свой кэш.
+const NAME = new URL(self.registration.scope).pathname.split("/").filter(Boolean).pop() || "kuhnya";
+const CACHE = NAME + "-v7";   // после новых картинок или переозвучки — увеличить номер
 const FILES = [
   "./", "./index.html", "./фразы.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png",
   "./img/артём-повар.png", "./fonts/nunito-cyrillic.woff2", "./fonts/nunito-latin.woff2",
@@ -27,7 +29,7 @@ self.addEventListener("install", e => e.waitUntil(precache().then(() => self.ski
 self.addEventListener("activate", e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k.startsWith("kuhnya-") && k !== CACHE).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k.startsWith(NAME + "-v") && k !== CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
